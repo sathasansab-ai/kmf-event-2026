@@ -86,77 +86,93 @@ export async function POST(req: NextRequest) {
           console.warn("Drive folder create warning:", folderErr.message);
         }
 
-        // 2. อัปโหลดไฟล์สลิปลงในโฟลเดอร์ชื่อร้าน (ใช้ ASCII filename และ Proper Stream)
+        // 2. อัปโหลดไฟล์สลิปลงในโฟลเดอร์ชื่อร้าน
         if (slipFile && slipFile.size > 0) {
           try {
             const arrayBuffer = await slipFile.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
-            const bufferToStream = (buf: Buffer): Readable => {
-              return new Readable({
-                read() {
-                  this.push(buf);
-                  this.push(null);
-                },
-              });
-            };
-
             const rawExt = (slipFile.name || "").split(".").pop()?.toLowerCase() || "jpg";
             const safeExt = ["jpg", "jpeg", "png", "webp", "pdf"].includes(rawExt) ? rawExt : "jpg";
             const safeFileName = `slip_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${safeExt}`;
 
-            // อัปโหลดไฟล์สลิป (เปิด supportsAllDrives ป้องกันกรณี Shared Folder)
-            let uploaded: any = null;
-            try {
-              uploaded = await drive.files.create({
-                requestBody: {
-                  name: safeFileName,
-                  parents: [shopFolderId],
-                  description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
-                },
-                media: {
-                  mimeType: slipFile.type || "image/jpeg",
-                  body: bufferToStream(buffer),
-                },
-                fields: "id, name, webViewLink, webContentLink",
-                supportsAllDrives: true,
-              });
-            } catch (folderUploadErr: any) {
-              console.warn("Upload to shop folder failed, trying root folder:", folderUploadErr?.message);
-              // Fallback: หากอัปโหลดลงโฟลเดอร์ย่อยมีปัญหา ให้เซฟลงโฟลเดอร์หลักทันทีเพื่อไม่ให้สลิปหาย
-              uploaded = await drive.files.create({
-                requestBody: {
-                  name: safeFileName,
-                  parents: [DRIVE_FOLDER_ID],
-                  description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
-                },
-                media: {
-                  mimeType: slipFile.type || "image/jpeg",
-                  body: bufferToStream(buffer),
-                },
-                fields: "id, name, webViewLink, webContentLink",
-                supportsAllDrives: true,
-              });
+            // หากมีการตั้งค่า GOOGLE_APPS_SCRIPT_URL (สำหรับบายพาส Quota Service Account) ให้ใช้วิธีนี้ก่อน
+            const appsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL?.trim();
+            if (appsScriptUrl && appsScriptUrl.startsWith("http")) {
+              try {
+                const gasRes = await fetch(appsScriptUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    folderId: DRIVE_FOLDER_ID,
+                    shopName,
+                    fileName: safeFileName,
+                    mimeType: slipFile.type || "image/jpeg",
+                    base64: buffer.toString("base64"),
+                  }),
+                });
+                const gasData = await gasRes.json();
+                if (gasData?.url) {
+                  slipUrl = gasData.url;
+                }
+              } catch (gasErr: any) {
+                console.warn("Apps Script upload warn:", gasErr?.message);
+              }
             }
 
-            if (uploaded?.data?.id) {
-              slipUrl = `https://drive.google.com/file/d/${uploaded.data.id}/view?usp=sharing`;
-
-              // พยายามตั้งสิทธิ์ให้อ่านได้ผ่านลิงก์
+            // หากยังไม่ได้ slipUrl ให้ใช้วิธี Google Drive API ตามปกติ
+            if (slipUrl === "-") {
+              let uploaded: any = null;
               try {
-                await drive.permissions.create({
-                  fileId: uploaded.data.id,
-                  requestBody: { role: "reader", type: "anyone" },
+                uploaded = await drive.files.create({
+                  requestBody: {
+                    name: safeFileName,
+                    parents: [shopFolderId],
+                    description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
+                  },
+                  media: {
+                    mimeType: slipFile.type || "image/jpeg",
+                    body: Readable.from(buffer),
+                  },
+                  fields: "id, name, webViewLink, webContentLink",
                   supportsAllDrives: true,
                 });
-              } catch (permErr: any) {
-                console.warn("Drive permission create warning:", permErr?.message);
+              } catch (folderUploadErr: any) {
+                console.warn("Upload to shop folder failed, trying root folder:", folderUploadErr?.message);
+                // Fallback: หากอัปโหลดลงโฟลเดอร์ย่อยมีปัญหา ให้เซฟลงโฟลเดอร์หลัก
+                uploaded = await drive.files.create({
+                  requestBody: {
+                    name: safeFileName,
+                    parents: [DRIVE_FOLDER_ID],
+                    description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
+                  },
+                  media: {
+                    mimeType: slipFile.type || "image/jpeg",
+                    body: Readable.from(buffer),
+                  },
+                  fields: "id, name, webViewLink, webContentLink",
+                  supportsAllDrives: true,
+                });
               }
-            } else {
-              console.error("Upload to Drive returned no file ID!");
+
+              if (uploaded?.data?.id) {
+                slipUrl = `https://drive.google.com/file/d/${uploaded.data.id}/view?usp=sharing`;
+
+                // พยายามตั้งสิทธิ์ให้อ่านได้ผ่านลิงก์
+                try {
+                  await drive.permissions.create({
+                    fileId: uploaded.data.id,
+                    requestBody: { role: "reader", type: "anyone" },
+                    supportsAllDrives: true,
+                  });
+                } catch (permErr: any) {
+                  console.warn("Drive permission create warning:", permErr?.message);
+                }
+              }
             }
           } catch (uploadErr: any) {
             console.error("Slip upload critical error:", uploadErr);
+            slipUrl = `ERROR: ${uploadErr.message || String(uploadErr)}`;
           }
         }
 
