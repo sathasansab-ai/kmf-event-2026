@@ -55,7 +55,7 @@ export default function AdminZonesPage() {
   const [zones, setZones] = useState<ZoneItem[]>(DEFAULT_ZONES);
   const [savedMsg, setSavedMsg] = useState("");
 
-  // โหลดการตั้งค่าโซนที่บันทึกไว้
+  // โหลดการตั้งค่าโซนที่บันทึกไว้ และซิงค์จำนวนจองจริงจาก Google Sheets
   useEffect(() => {
     try {
       const saved = localStorage.getItem("kmf_zone_config");
@@ -66,6 +66,19 @@ export default function AdminZonesPage() {
         }
       }
     } catch (e) {}
+
+    // ดึงจำนวนล็อคที่จองจริงจาก Google Sheets มาอัปเดตให้อัตโนมัติ
+    fetch("/api/zones", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.zones) {
+          setZones(prev => prev.map(z => ({
+            ...z,
+            booked: data.zones[z.key]?.booked !== undefined ? data.zones[z.key].booked : z.booked,
+          })));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const updateZone = (key: string, field: "price" | "total" | "booked", value: number) => {

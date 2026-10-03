@@ -86,14 +86,20 @@ export async function POST(req: NextRequest) {
           console.warn("Drive folder create warning:", folderErr.message);
         }
 
-        // 2. อัปโหลดไฟล์สลิปลงในโฟลเดอร์ชื่อร้าน (ใช้ ASCII filename ป้องกัน Header Encoding Error)
+        // 2. อัปโหลดไฟล์สลิปลงในโฟลเดอร์ชื่อร้าน (ใช้ ASCII filename และ Proper Stream)
         if (slipFile && slipFile.size > 0) {
           try {
             const arrayBuffer = await slipFile.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
-            const stream = new Readable();
-            stream.push(buffer);
-            stream.push(null);
+
+            const bufferToStream = (buf: Buffer): Readable => {
+              return new Readable({
+                read() {
+                  this.push(buf);
+                  this.push(null);
+                },
+              });
+            };
 
             const rawExt = (slipFile.name || "").split(".").pop()?.toLowerCase() || "jpg";
             const safeExt = ["jpg", "jpeg", "png", "webp", "pdf"].includes(rawExt) ? rawExt : "jpg";
@@ -110,7 +116,7 @@ export async function POST(req: NextRequest) {
                 },
                 media: {
                   mimeType: slipFile.type || "image/jpeg",
-                  body: stream,
+                  body: bufferToStream(buffer),
                 },
                 fields: "id, name, webViewLink, webContentLink",
                 supportsAllDrives: true,
@@ -118,9 +124,6 @@ export async function POST(req: NextRequest) {
             } catch (folderUploadErr: any) {
               console.warn("Upload to shop folder failed, trying root folder:", folderUploadErr?.message);
               // Fallback: หากอัปโหลดลงโฟลเดอร์ย่อยมีปัญหา ให้เซฟลงโฟลเดอร์หลักทันทีเพื่อไม่ให้สลิปหาย
-              const fallbackStream = new Readable();
-              fallbackStream.push(buffer);
-              fallbackStream.push(null);
               uploaded = await drive.files.create({
                 requestBody: {
                   name: safeFileName,
@@ -129,7 +132,7 @@ export async function POST(req: NextRequest) {
                 },
                 media: {
                   mimeType: slipFile.type || "image/jpeg",
-                  body: fallbackStream,
+                  body: bufferToStream(buffer),
                 },
                 fields: "id, name, webViewLink, webContentLink",
                 supportsAllDrives: true,
@@ -149,17 +152,27 @@ export async function POST(req: NextRequest) {
               } catch (permErr: any) {
                 console.warn("Drive permission create warning:", permErr?.message);
               }
+            } else {
+              console.error("Upload to Drive returned no file ID!");
             }
           } catch (uploadErr: any) {
             console.error("Slip upload critical error:", uploadErr);
           }
         }
 
-        // 3. Google Sheets: บันทึกข้อมูลร้านค้า (ใช้ Range "A:M" โดยไม่เจาะจงชื่อ Sheet)
+        // 3. Google Sheets: บันทึกข้อมูลร้านค้า (หาชื่อชีตอัตโนมัติ)
+        let sheetTitle = "Sheet1";
+        try {
+          const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+          if (meta.data.sheets && meta.data.sheets.length > 0) {
+            sheetTitle = meta.data.sheets[0].properties?.title || "Sheet1";
+          }
+        } catch (metaErr) {}
+
         try {
           await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
-            range: "A:M",
+            range: `'${sheetTitle}'!A:M`,
             valueInputOption: "USER_ENTERED",
             insertDataOption: "INSERT_ROWS",
             requestBody: {

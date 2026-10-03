@@ -39,6 +39,8 @@ export default function AdminDashboard() {
   const [zones, setZones] = useState<ZoneItem[]>(DEFAULT_ZONES);
   const [vendors, setVendors] = useState<VendorItem[]>([]);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [sheetTitle, setSheetTitle] = useState("");
+  const [apiError, setApiError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [refreshToast, setRefreshToast] = useState("");
   const [googleStats, setGoogleStats] = useState({
@@ -50,6 +52,7 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     setIsLoading(true);
+    setApiError("");
     let currentZones = DEFAULT_ZONES;
 
     // 1. โหลดการตั้งค่าราคาและจำนวนล็อคจาก localStorage
@@ -70,6 +73,7 @@ export default function AdminDashboard() {
 
       if (data.success && data.stats) {
         setIsGoogleConnected(true);
+        if (data.sheetTitle) setSheetTitle(data.sheetTitle);
         setGoogleStats(data.stats);
         setVendors(data.vendors || []);
 
@@ -81,10 +85,11 @@ export default function AdminDashboard() {
         }));
         setZones(updatedZones);
       } else {
+        if (data.error) setApiError(data.error);
         setZones(currentZones);
       }
-    } catch (err) {
-      console.warn("Could not fetch Google Sheets data:", err);
+    } catch (err: any) {
+      setApiError(err?.message || "ไม่สามารถติดต่อ API ได้");
       setZones(currentZones);
     } finally {
       setIsLoading(false);
@@ -125,7 +130,7 @@ export default function AdminDashboard() {
             {isGoogleConnected ? (
               <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Live Google Sheets
+                Live Google Sheets {sheetTitle ? `(${sheetTitle})` : ""}
               </span>
             ) : (
               <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -147,6 +152,12 @@ export default function AdminDashboard() {
           {isLoading ? "กำลังโหลดข้อมูล..." : "รีเฟรชข้อมูล (ดึงจาก Sheet)"}
         </button>
       </div>
+
+      {apiError && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium p-3.5 rounded-xl">
+          ⚠️ <strong>การเชื่อมต่อ Google Sheets:</strong> {apiError}
+        </div>
+      )}
 
       {refreshToast && (
         <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-sm font-bold px-4 py-3 rounded-xl shadow-sm animate-pulse">

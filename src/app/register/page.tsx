@@ -58,7 +58,35 @@ export default function RegisterPage() {
     try {
       const savedConfig = localStorage.getItem("kmf_site_config");
       if (savedConfig) setSiteConfig(JSON.parse(savedConfig));
+    } catch (e) {}
 
+    // ดึงจำนวนล็อคคงเหลือสดจาก Google Sheets เพื่อหักยอดอัตโนมัติ
+    const fetchLiveZones = async () => {
+      try {
+        const res = await fetch("/api/zones", { cache: "no-store" });
+        const data = await res.json();
+        if (data.success && data.zones) {
+          setZones(prev => {
+            const next = { ...prev };
+            Object.entries(data.zones).forEach(([k, z]: [string, any]) => {
+              if (next[k]) {
+                next[k] = {
+                  ...next[k],
+                  remaining: z.remaining,
+                };
+              }
+            });
+            return next;
+          });
+        }
+      } catch (err) {
+        console.warn("Could not fetch live zones from server:", err);
+      }
+    };
+    fetchLiveZones();
+
+    // ดึงราคาและการตั้งค่าที่แอดมินปรับใน /admin/zones
+    try {
       const savedZones = localStorage.getItem("kmf_zone_config");
       if (savedZones) {
         const parsed = JSON.parse(savedZones);
@@ -71,7 +99,6 @@ export default function RegisterPage() {
                   ...next[z.key],
                   name: `โซน ${z.key} (${z.name})`,
                   price: Number(z.price) || next[z.key].price,
-                  remaining: Math.max(0, (Number(z.total) || 0) - (Number(z.booked) || 0)),
                 };
               }
             });

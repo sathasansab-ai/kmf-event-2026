@@ -36,25 +36,50 @@ export async function GET() {
 
     const auth = new google.auth.GoogleAuth({
       credentials,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
     const sheets = google.sheets({ version: "v4", auth });
 
-    // อ่านข้อมูลร้านค้าทั้งหมดตั้งแต่แถวที่ 2 เป็นต้นไป (ข้าม Header แถวแรก)
+    // 1. ดึงชื่อแท็บชีตแรกอัตโนมัติ (รองรับทั้ง ชีต1, Sheet1, etc.)
+    let sheetTitle = "Sheet1";
+    try {
+      const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+      if (meta.data.sheets && meta.data.sheets.length > 0) {
+        sheetTitle = meta.data.sheets[0].properties?.title || "Sheet1";
+      }
+    } catch (metaErr: any) {
+      console.warn("Could not get sheet metadata, using default:", metaErr?.message);
+    }
+
+    // 2. อ่านข้อมูลทั้งหมดจากแท็บชีตแรก
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: "A2:M",
+      range: `'${sheetTitle}'!A:M`,
     });
 
-    const rows = res.data.values || [];
+    const allRows = res.data.values || [];
+
+    // ตรวจสอบว่าแถวแรกเป็น Header หรือไม่
+    let dataRows = allRows;
+    if (dataRows.length > 0) {
+      const firstCell = String(dataRows[0][0] || "").toLowerCase();
+      if (
+        firstCell.includes("เวลา") || 
+        firstCell.includes("time") || 
+        firstCell.includes("timestamp") || 
+        firstCell.includes("ชื่อ")
+      ) {
+        dataRows = dataRows.slice(1);
+      }
+    }
 
     let totalDeposit = 0;
     let totalFull = 0;
     let totalBooked = 0;
     const zoneBooked: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
 
-    const vendors = rows.map((row, index) => {
+    const vendors = dataRows.map((row, index) => {
       const timestamp = row[0] || "-";
       const firstName = row[1] || "-";
       const lastName = row[2] || "-";
@@ -96,12 +121,13 @@ export async function GET() {
       };
     });
 
-    // เรียงลำดับจากร้านล่าสุดขึ้นก่อน
-    vendors.reverse();
+    // เรียงลำดับจากร้านที่สมัครล่าสุดขึ้นก่อน
+    const vendorsReversed = [...vendors].reverse();
 
     return NextResponse.json({
       success: true,
       isGoogleConnected: true,
+      sheetTitle,
       stats: {
         totalVendors: vendors.length,
         totalBooked,
@@ -109,7 +135,7 @@ export async function GET() {
         totalFull,
         zoneBooked,
       },
-      vendors,
+      vendors: vendorsReversed,
     });
 
   } catch (err: any) {
