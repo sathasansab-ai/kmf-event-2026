@@ -11,13 +11,6 @@ export default function RegisterPage() {
   const [submitError, setSubmitError] = useState("");
   const [siteConfig, setSiteConfig] = useState<any>(null);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("kmf_site_config");
-      if (saved) setSiteConfig(JSON.parse(saved));
-    } catch (e) {}
-  }, []);
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -30,25 +23,25 @@ export default function RegisterPage() {
     slip: null as File | null,
   });
 
-  const zones = {
+  const [zones, setZones] = useState<Record<string, { name: string; price: number; remaining: number; mapDesc: string; color: string }>>({
     A: { 
       name: "โซน A (ถนนคนเดิน - FESTIVAL MARKET)", 
       price: 3500, 
-      remaining: 19,
+      remaining: 30,
       mapDesc: "พื้นที่ริมถนนคนเดินสายหลัก ใกล้เวทีกลาง มีคนเดินผ่านตลอดทั้งคืน",
       color: "bg-orange-500"
     },
     B: { 
       name: "โซน B (ร้านค้า , ร้าน Craft - ART & MARKET)", 
       price: 2500, 
-      remaining: 12,
+      remaining: 15,
       mapDesc: "พื้นที่ลานคราฟท์และต้นไม้ใหญ่ บรรยากาศอบอุ่น สไตล์วินเทจ",
       color: "bg-blue-500"
     },
     C: { 
       name: "โซน C (ตลาดริมน้ำ - FOOD ZONE)", 
       price: 2000, 
-      remaining: 5,
+      remaining: 7,
       mapDesc: "พื้นที่เลียบระเบียงริมน้ำบึงหัวทะเล เหมาะสำหรับอาหารและเครื่องดื่มชิลๆ",
       color: "bg-teal-500"
     },
@@ -59,7 +52,35 @@ export default function RegisterPage() {
       mapDesc: "ลานจอดรถ Food Truck กว้างขวาง ด้านหน้าจอหนังกลางแปลงริมน้ำ",
       color: "bg-rose-500"
     },
-  };
+  });
+
+  useEffect(() => {
+    try {
+      const savedConfig = localStorage.getItem("kmf_site_config");
+      if (savedConfig) setSiteConfig(JSON.parse(savedConfig));
+
+      const savedZones = localStorage.getItem("kmf_zone_config");
+      if (savedZones) {
+        const parsed = JSON.parse(savedZones);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setZones(prev => {
+            const next = { ...prev };
+            parsed.forEach((z: any) => {
+              if (z.key && next[z.key]) {
+                next[z.key] = {
+                  ...next[z.key],
+                  name: `โซน ${z.key} (${z.name})`,
+                  price: Number(z.price) || next[z.key].price,
+                  remaining: Math.max(0, (Number(z.total) || 0) - (Number(z.booked) || 0)),
+                };
+              }
+            });
+            return next;
+          });
+        }
+      }
+    } catch (e) {}
+  }, []);
 
   const categories = {
     A: ["ของทานเล่น", "อาหารจานหลัก", "เครื่องดื่ม"],
@@ -169,6 +190,11 @@ export default function RegisterPage() {
         
         {/* Header Progress */}
         <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white p-8 text-center">
+          {siteConfig?.logo && (
+            <div className="mb-4 flex justify-center">
+              <img src={siteConfig.logo} alt="Event Logo" className="h-16 max-w-[200px] object-contain drop-shadow" />
+            </div>
+          )}
           <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
             ✨ แบบฟอร์มสมัครร้านค้า ✨
           </h1>
@@ -250,14 +276,21 @@ export default function RegisterPage() {
               </div>
 
               {/* Master Map Banner */}
-              <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200 flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm text-blue-900">🗺️ ผังพื้นที่จัดงานรวม (14 โซน)</h3>
-                  <p className="text-xs text-blue-700 mt-0.5">ตลาดน้ำบึงหัวทะเล โคราช</p>
+              <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-sm text-blue-900">🗺️ ผังพื้นที่จัดงานรวม (14 โซน)</h3>
+                    <p className="text-xs text-blue-700 mt-0.5">ตลาดน้ำบึงหัวทะเล โคราช</p>
+                  </div>
+                  <span className="text-xs bg-white text-blue-800 font-bold px-3 py-1.5 rounded-lg border border-blue-200">
+                    ผังงานภาพรวม
+                  </span>
                 </div>
-                <span className="text-xs bg-white text-blue-800 font-bold px-3 py-1.5 rounded-lg border border-blue-200">
-                  ผังงานภาพรวม
-                </span>
+                {siteConfig?.mainMap && (
+                  <div className="border border-blue-200 rounded-xl overflow-hidden bg-white p-2">
+                    <img src={siteConfig.mainMap} alt="ผังพื้นที่จัดงานรวม" className="w-full max-h-80 object-contain mx-auto rounded-lg" />
+                  </div>
+                )}
               </div>
               
               <div>

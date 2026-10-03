@@ -1,12 +1,106 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function Home() {
+  const [showPoster, setShowPoster] = useState(true);
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  const [zonePrices, setZonePrices] = useState({
+    A: 3500,
+    B: 2500,
+    C: 2000,
+    D: 4000,
+  });
+
+  useEffect(() => {
+    // โหลดรูปภาพและโลโก้จากที่แอดมินตั้งค่าไว้
+    try {
+      const savedMedia = localStorage.getItem("kmf_site_config");
+      if (savedMedia) {
+        const parsed = JSON.parse(savedMedia);
+        if (parsed.poster) setPosterUrl(parsed.poster);
+        if (parsed.logo) setLogoUrl(parsed.logo);
+      }
+
+      // โหลดราคาโซนจากที่แอดมินปรับใน /admin/zones
+      const savedZones = localStorage.getItem("kmf_zone_config");
+      if (savedZones) {
+        const parsedZones = JSON.parse(savedZones);
+        if (Array.isArray(parsedZones)) {
+          const newPrices: any = {};
+          parsedZones.forEach((z: any) => {
+            if (z.key && z.price) newPrices[z.key] = z.price;
+          });
+          setZonePrices(prev => ({ ...prev, ...newPrices }));
+        }
+      }
+    } catch (e) {}
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-amber-400 selection:text-black">
       
+      {/* 🎬 Pop-up โปสเตอร์งาน (แสดงเมื่อเปิดเว็บ และกดปิดได้) */}
+      {showPoster && (
+        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative text-slate-800 border-4 border-amber-400">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowPoster(false)}
+              className="absolute top-3 right-3 w-9 h-9 bg-black/60 hover:bg-black text-white rounded-full flex items-center justify-center text-sm font-black transition z-10"
+              title="ปิดหน้าต่าง"
+            >
+              ✕
+            </button>
+
+            {/* Poster Image */}
+            <div className="bg-slate-950 min-h-[360px] flex items-center justify-center text-center p-2">
+              {posterUrl ? (
+                <img src={posterUrl} alt="Event Poster" className="max-h-[500px] w-full object-contain rounded-2xl" />
+              ) : (
+                <div className="p-8 text-slate-300 space-y-3">
+                  <span className="text-6xl block">🎬</span>
+                  <div className="inline-block border border-amber-400 text-amber-300 px-3 py-1 rounded-full text-xs font-bold">
+                    NEO CINEMA CARNIVAL : ดูด้วยกัน
+                  </div>
+                  <h3 className="text-2xl font-black text-white">KORAT MOVIE FESTIVAL 2026</h3>
+                  <p className="text-xs text-slate-400">20 - 24 ตุลาคม 2569 · ตลาดน้ำบึงหัวทะเล</p>
+                  <p className="text-[11px] text-amber-300/80 bg-amber-950/50 p-2 rounded-xl">
+                    (ผู้จัดงานสามารถอัปโหลดภาพโปสเตอร์จริงได้ที่เมนู /admin/media)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Bottom Actions */}
+            <div className="p-4 bg-slate-50 flex gap-3">
+              <button
+                onClick={() => setShowPoster(false)}
+                className="w-1/2 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100 transition"
+              >
+                เข้าสู่เว็บไซต์
+              </button>
+              <Link
+                href="/register"
+                onClick={() => setShowPoster(false)}
+                className="w-1/2 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm text-center shadow transition"
+              >
+                จองล็อคทันที 🎟️
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-b from-blue-950 via-slate-900 to-slate-900 pt-16 pb-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
+          {logoUrl && (
+            <img src={logoUrl} alt="Logo" className="h-16 mx-auto mb-4 object-contain" />
+          )}
           <div className="inline-block bg-amber-500/20 border border-amber-400 text-amber-300 px-5 py-2 rounded-full text-sm font-bold tracking-wider mb-6">
             🎬 NEO CINEMA CARNIVAL : ดูด้วยกัน
           </div>
@@ -77,7 +171,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Zones Summary */}
+          {/* Zones Summary (ราคาซิงค์ตรงกับ Admin) */}
           <div className="mt-10 pt-8 border-t border-slate-200">
             <h3 className="text-xl font-bold text-slate-800 mb-4 text-center">
               🗺️ โซนที่เปิดรับสมัครร้านค้า
@@ -86,22 +180,22 @@ export default function Home() {
               <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200">
                 <div className="font-extrabold text-orange-900 text-sm">โซน A</div>
                 <div className="text-xs text-orange-700 font-medium mt-1">ถนนคนเดิน</div>
-                <div className="text-sm font-bold text-orange-800 mt-2">฿3,500</div>
+                <div className="text-sm font-bold text-orange-800 mt-2">฿{zonePrices.A.toLocaleString()}</div>
               </div>
               <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200">
                 <div className="font-extrabold text-blue-900 text-sm">โซน B</div>
                 <div className="text-xs text-blue-700 font-medium mt-1">ร้านค้า / Craft</div>
-                <div className="text-sm font-bold text-blue-800 mt-2">฿2,500</div>
+                <div className="text-sm font-bold text-blue-800 mt-2">฿{zonePrices.B.toLocaleString()}</div>
               </div>
               <div className="p-4 rounded-2xl bg-teal-50 border border-teal-200">
                 <div className="font-extrabold text-teal-900 text-sm">โซน C</div>
                 <div className="text-xs text-teal-700 font-medium mt-1">ตลาดริมน้ำ</div>
-                <div className="text-sm font-bold text-teal-800 mt-2">฿2,000</div>
+                <div className="text-sm font-bold text-teal-800 mt-2">฿{zonePrices.C.toLocaleString()}</div>
               </div>
               <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200">
                 <div className="font-extrabold text-rose-900 text-sm">โซน D</div>
                 <div className="text-xs text-rose-700 font-medium mt-1">Food Truck</div>
-                <div className="text-sm font-bold text-rose-800 mt-2">฿4,000</div>
+                <div className="text-sm font-bold text-rose-800 mt-2">฿{zonePrices.D.toLocaleString()}</div>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ZoneItem {
   key: string;
@@ -12,55 +12,74 @@ interface ZoneItem {
   categories: string[];
 }
 
-export default function AdminZonesPage() {
-  const [zones, setZones] = useState<ZoneItem[]>([
-    {
-      key: "A",
-      name: "ถนนคนเดิน (FESTIVAL MARKET)",
-      title: "ของทานเล่น, อาหารจานหลัก, เครื่องดื่ม",
-      price: 3500,
-      total: 30,
-      booked: 11,
-      categories: ["ของทานเล่น", "อาหารจานหลัก", "เครื่องดื่ม"],
-    },
-    {
-      key: "B",
-      name: "ร้านค้า / ร้าน Craft (ART & MARKET)",
-      title: "งานคราฟท์, เสื้อผ้า, งานปูนปาสเตอร์, ของแต่งบ้าน",
-      price: 2500,
-      total: 15,
-      booked: 3,
-      categories: ["งานปูนปลาสเตอร์", "ร้านถ่ายภาพ", "ร้านเสื้อผ้า", "งานคราฟท์/แฮนด์เมด", "เครื่องประดับ", "ของตกแต่งบ้าน"],
-    },
-    {
-      key: "C",
-      name: "ตลาดริมน้ำ (FOOD ZONE)",
-      title: "สินค้าท้องถิ่น, อาหารพื้นบ้าน, ผลไม้",
-      price: 2000,
-      total: 7,
-      booked: 2,
-      categories: ["สินค้าท้องถิ่น", "อาหารพื้นบ้าน", "ผลไม้"],
-    },
-    {
-      key: "D",
-      name: "Food Truck (CINEMA BY THE RIVER)",
-      title: "รถฟู้ดทรัค อาหารและเครื่องดื่ม",
-      price: 4000,
-      total: 8,
-      booked: 0,
-      categories: ["รถ Food Truck อาหาร", "รถ Food Truck เครื่องดื่ม"],
-    },
-  ]);
+const DEFAULT_ZONES: ZoneItem[] = [
+  {
+    key: "A",
+    name: "ถนนคนเดิน (FESTIVAL MARKET)",
+    title: "ของทานเล่น, อาหารจานหลัก, เครื่องดื่ม",
+    price: 3500,
+    total: 30,
+    booked: 0,
+    categories: ["ของทานเล่น", "อาหารจานหลัก", "เครื่องดื่ม"],
+  },
+  {
+    key: "B",
+    name: "ร้านค้า / ร้าน Craft (ART & MARKET)",
+    title: "งานคราฟท์, เสื้อผ้า, งานปูนปาสเตอร์, ของแต่งบ้าน",
+    price: 2500,
+    total: 15,
+    booked: 0,
+    categories: ["งานปูนปลาสเตอร์", "ร้านถ่ายภาพ", "ร้านเสื้อผ้า", "งานคราฟท์/แฮนด์เมด", "เครื่องประดับ", "ของตกแต่งบ้าน"],
+  },
+  {
+    key: "C",
+    name: "ตลาดริมน้ำ (FOOD ZONE)",
+    title: "สินค้าท้องถิ่น, อาหารพื้นบ้าน, ผลไม้",
+    price: 2000,
+    total: 7,
+    booked: 0,
+    categories: ["สินค้าท้องถิ่น", "อาหารพื้นบ้าน", "ผลไม้"],
+  },
+  {
+    key: "D",
+    name: "Food Truck (CINEMA BY THE RIVER)",
+    title: "รถฟู้ดทรัค อาหารและเครื่องดื่ม",
+    price: 4000,
+    total: 8,
+    booked: 0,
+    categories: ["รถ Food Truck อาหาร", "รถ Food Truck เครื่องดื่ม"],
+  },
+];
 
+export default function AdminZonesPage() {
+  const [zones, setZones] = useState<ZoneItem[]>(DEFAULT_ZONES);
   const [savedMsg, setSavedMsg] = useState("");
+
+  // โหลดการตั้งค่าโซนที่บันทึกไว้
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("kmf_zone_config");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setZones(parsed);
+        }
+      }
+    } catch (e) {}
+  }, []);
 
   const updateZone = (key: string, field: "price" | "total" | "booked", value: number) => {
     setZones(prev => prev.map(z => z.key === key ? { ...z, [field]: value } : z));
   };
 
   const handleSave = () => {
-    setSavedMsg("บันทึกราคาและจำนวนล็อคเรียบร้อยแล้ว!");
-    setTimeout(() => setSavedMsg(""), 3500);
+    try {
+      localStorage.setItem("kmf_zone_config", JSON.stringify(zones));
+      setSavedMsg("บันทึกราคาและจำนวนล็อคเรียบร้อยแล้ว! ข้อมูลจะเชื่อมโยงไปยังหน้าสมัครและหน้าแรกทันที");
+      setTimeout(() => setSavedMsg(""), 4000);
+    } catch (e) {
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    }
   };
 
   return (

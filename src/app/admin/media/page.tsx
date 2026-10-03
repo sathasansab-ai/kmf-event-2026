@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 export default function AdminMediaPage() {
   const [logo, setLogo] = useState<string | null>(null);
+  const [poster, setPoster] = useState<string | null>(null);
   const [mainMap, setMainMap] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   
@@ -30,6 +31,7 @@ export default function AdminMediaPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.logo) setLogo(parsed.logo);
+        if (parsed.poster) setPoster(parsed.poster);
         if (parsed.mainMap) setMainMap(parsed.mainMap);
         if (parsed.qrCode) setQrCode(parsed.qrCode);
         if (parsed.zoneMaps) setZoneMaps(parsed.zoneMaps);
@@ -58,13 +60,14 @@ export default function AdminMediaPage() {
     try {
       const config = {
         logo,
+        poster,
         mainMap,
         qrCode,
         zoneMaps,
         bankInfo,
       };
       localStorage.setItem("kmf_site_config", JSON.stringify(config));
-      setSavedMsg("บันทึกรูปภาพ ผังงาน และข้อมูลบัญชีเรียบร้อยแล้ว! ข้อมูลจะแสดงผลที่หน้าสมัครทันที");
+      setSavedMsg("บันทึกรูปภาพ โปสเตอร์ ผังงาน และข้อมูลบัญชีเรียบร้อยแล้ว! ข้อมูลจะแสดงผลทันที");
       setTimeout(() => setSavedMsg(""), 4000);
     } catch (err) {
       alert("ไฟล์รูปภาพอาจมีขนาดใหญ่เกินไป แนะนำให้บีบอัดรูปภาพก่อนอัปโหลดครับ");
@@ -78,10 +81,10 @@ export default function AdminMediaPage() {
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-slate-200 pb-5">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-800">
-            🖼️ จัดการรูปภาพ, ผังงาน & QR Code รับเงิน
+            🖼️ จัดการรูปภาพ, ผังงาน & โปสเตอร์
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            อัปโหลดภาพแผนผัง QR Code พร้อมเพย์ และข้อมูลธนาคารสำหรับแสดงในหน้าลงทะเบียนร้านค้า
+            อัปโหลดภาพโปสเตอร์ Pop-up, QR Code พร้อมเพย์, บัญชีธนาคาร และผังงาน
           </p>
         </div>
 
@@ -192,9 +195,41 @@ export default function AdminMediaPage() {
         </div>
       </div>
 
-      {/* 2. ผังงานรวม */}
+      {/* 2. ภาพโปสเตอร์งาน (Pop-up) */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-bold text-slate-800 mb-1">2. ภาพแผนผังงานรวม (Master Event Map)</h2>
+        <div className="border-b border-slate-100 pb-3 mb-4">
+          <span className="bg-purple-100 text-purple-900 text-xs font-bold px-3 py-1 rounded-full uppercase">
+            Homepage Pop-up
+          </span>
+          <h2 className="text-xl font-bold text-slate-800 mt-2">2. ภาพโปสเตอร์งานสำหรับแสดงใน Pop-up (Event Poster)</h2>
+          <p className="text-slate-500 text-xs mt-1">ภาพนี้จะเด้งขึ้นมาต้อนรับเมื่อผู้ใช้เปิดเข้าหน้าแรกของเว็บไซต์</p>
+        </div>
+        
+        <div className="border-2 border-dashed border-slate-300 rounded-2xl p-4 bg-slate-50 flex flex-col items-center justify-center min-h-[240px]">
+          {poster ? (
+            <div className="text-center space-y-3">
+              <img src={poster} alt="Event Poster" className="max-h-80 object-contain rounded-xl shadow-md border bg-white p-2 mx-auto" />
+              <p className="text-xs text-emerald-600 font-bold">✓ อัปโหลดภาพโปสเตอร์ Pop-up แล้ว</p>
+            </div>
+          ) : (
+            <div className="text-center p-6 text-slate-400">
+              <span className="text-5xl block mb-2">🎬</span>
+              <p className="text-sm font-semibold text-slate-700">ยังไม่มีภาพโปสเตอร์งาน Pop-up</p>
+              <p className="text-xs text-slate-400 mt-1">แนะนำรูปแนวตั้ง (เช่น 1080x1350 หรือ 1080x1920)</p>
+            </div>
+          )}
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={(e) => handleFileUpload(e, setPoster)}
+            className="mt-4 text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
+          />
+        </div>
+      </div>
+
+      {/* 3. ผังงานรวม */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h2 className="text-lg font-bold text-slate-800 mb-1">3. ภาพแผนผังงานรวม (Master Event Map)</h2>
         <p className="text-slate-500 text-xs mb-4">แสดงในหน้าเลือกโซนเพื่อให้ผู้สมัครเห็นตำแหน่ง 14 โซน</p>
         
         <div className="border-2 border-dashed border-slate-300 rounded-2xl p-4 bg-slate-50 flex flex-col items-center justify-center min-h-[220px]">
@@ -215,9 +250,9 @@ export default function AdminMediaPage() {
         </div>
       </div>
 
-      {/* 3. ผังแยกแต่ละโซน */}
+      {/* 4. ผังแยกแต่ละโซน */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-bold text-slate-800 mb-1">3. ภาพแผนผังแยกแต่ละโซน (Zone Maps)</h2>
+        <h2 className="text-lg font-bold text-slate-800 mb-1">4. ภาพแผนผังแยกแต่ละโซน (Zone Maps)</h2>
         <p className="text-slate-500 text-xs mb-4">เมื่อผู้สมัครคลิกเลือกโซน A, B, C หรือ D ภาพผังนี้จะแสดงให้เห็นทันที</p>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -255,9 +290,9 @@ export default function AdminMediaPage() {
         </div>
       </div>
 
-      {/* 4. โลโก้งาน */}
+      {/* 5. โลโก้งาน */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-bold text-slate-800 mb-1">4. โลโก้งานหลัก (Event Logo)</h2>
+        <h2 className="text-lg font-bold text-slate-800 mb-1">5. โลโก้งานหลัก (Event Logo)</h2>
         <div className="flex flex-col sm:flex-row items-center gap-6 mt-3">
           <div className="w-32 h-32 border-2 border-dashed border-slate-300 rounded-2xl flex items-center justify-center bg-slate-50 overflow-hidden">
             {logo ? (
