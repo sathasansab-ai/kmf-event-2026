@@ -60,6 +60,22 @@ export async function GET() {
 
     const allRows = res.data.values || [];
 
+    const HEADERS = [
+      "วันเวลาที่สมัคร",
+      "ชื่อผู้สมัคร",
+      "นามสกุล",
+      "ชื่อร้านค้า",
+      "เบอร์โทรศัพท์",
+      "Line ID",
+      "โซน",
+      "ชื่อโซน",
+      "ประเภทสินค้า",
+      "จำนวนล็อค",
+      "ราคาเต็มรวม (บาท)",
+      "ยอดมัดจำ 50% (บาท)",
+      "หลักฐานการโอนเงิน (สลิป)",
+    ];
+
     // ตรวจสอบว่าแถวแรกเป็น Header หรือไม่
     let dataRows = allRows;
     if (dataRows.length > 0) {
@@ -71,7 +87,40 @@ export async function GET() {
         firstCell.includes("ชื่อ")
       ) {
         dataRows = dataRows.slice(1);
+      } else {
+        // แถวแรกเป็นข้อมูลแต่ยังไม่มีหัวตาราง ให้แทรกหัวตารางลงแถว 1
+        try {
+          const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+          const sheetId = meta.data.sheets?.[0]?.properties?.sheetId || 0;
+          await sheets.spreadsheets.batchUpdate({
+            spreadsheetId: SPREADSHEET_ID,
+            requestBody: {
+              requests: [{
+                insertDimension: {
+                  range: { sheetId, dimension: "ROWS", startIndex: 0, endIndex: 1 },
+                  inheritFromBefore: false,
+                },
+              }],
+            },
+          });
+          await sheets.spreadsheets.values.update({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `'${sheetTitle}'!A1:M1`,
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: [HEADERS] },
+          });
+        } catch (e) {}
       }
+    } else {
+      // แผ่นงานยังว่างเปล่า ให้สร้างหัวตารางเตรียมไว้
+      try {
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SPREADSHEET_ID,
+          range: `'${sheetTitle}'!A1:M1`,
+          valueInputOption: "USER_ENTERED",
+          requestBody: { values: [HEADERS] },
+        });
+      } catch (e) {}
     }
 
     let totalDeposit = 0;

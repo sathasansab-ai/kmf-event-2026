@@ -176,14 +176,92 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // 3. Google Sheets: บันทึกข้อมูลร้านค้า (หาชื่อชีตอัตโนมัติ)
+        // 3. Google Sheets: บันทึกข้อมูลร้านค้า (หาชื่อชีตอัตโนมัติ และสร้างหัวตารางหากยังไม่มี)
         let sheetTitle = "Sheet1";
+        let sheetId = 0;
         try {
           const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
           if (meta.data.sheets && meta.data.sheets.length > 0) {
             sheetTitle = meta.data.sheets[0].properties?.title || "Sheet1";
+            sheetId = meta.data.sheets[0].properties?.sheetId || 0;
           }
         } catch (metaErr) {}
+
+        const HEADERS = [
+          "วันเวลาที่สมัคร",
+          "ชื่อผู้สมัคร",
+          "นามสกุล",
+          "ชื่อร้านค้า",
+          "เบอร์โทรศัพท์",
+          "Line ID",
+          "โซน",
+          "ชื่อโซน",
+          "ประเภทสินค้า",
+          "จำนวนล็อค",
+          "ราคาเต็มรวม (บาท)",
+          "ยอดมัดจำ 50% (บาท)",
+          "หลักฐานการโอนเงิน (สลิป)",
+        ];
+
+        // ตรวจสอบและสร้างหัวตารางที่แถว 1 อัตโนมัติ
+        try {
+          const headerCheck = await sheets.spreadsheets.values.get({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `'${sheetTitle}'!A1:M1`,
+          });
+          const firstRow = headerCheck.data.values?.[0] || [];
+
+          if (firstRow.length === 0) {
+            // แถว 1 ว่างเปล่า -> เขียนหัวตารางลงไปได้เลย
+            await sheets.spreadsheets.values.update({
+              spreadsheetId: SPREADSHEET_ID,
+              range: `'${sheetTitle}'!A1:M1`,
+              valueInputOption: "USER_ENTERED",
+              requestBody: { values: [HEADERS] },
+            });
+          } else {
+            // แถว 1 มีข้อมูล -> ตรวจดูว่าเป็นหัวตารางอยู่แล้วหรือไม่
+            const cell0 = String(firstRow[0] || "").toLowerCase();
+            const isAlreadyHeader = cell0.includes("เวลา") || cell0.includes("time") || cell0.includes("timestamp");
+            if (!isAlreadyHeader) {
+              // แทรกแถวใหม่ที่แถว 1 แล้วใส่หัวตาราง
+              try {
+                await sheets.spreadsheets.batchUpdate({
+                  spreadsheetId: SPREADSHEET_ID,
+                  requestBody: {
+                    requests: [
+                      {
+                        insertDimension: {
+                          range: {
+                            sheetId: sheetId,
+                            dimension: "ROWS",
+                            startIndex: 0,
+                            endIndex: 1,
+                          },
+                          inheritFromBefore: false,
+                        },
+                      },
+                    ],
+                  },
+                });
+                await sheets.spreadsheets.values.update({
+                  spreadsheetId: SPREADSHEET_ID,
+                  range: `'${sheetTitle}'!A1:M1`,
+                  valueInputOption: "USER_ENTERED",
+                  requestBody: { values: [HEADERS] },
+                });
+              } catch (insErr) {
+                console.warn("Could not insert header row:", insErr);
+              }
+            }
+          }
+        } catch (hErr) {
+          console.warn("Header setup warning:", hErr);
+        }
+
+        // ป้องกัน Google Sheets ตัดเลข 0 ข้างหน้าของเบอร์โทรและ Line ID
+        const formattedPhone = phone ? (phone.startsWith("'") ? phone : `'${phone}`) : "-";
+        const formattedLineId = lineId ? (lineId.startsWith("'") ? lineId : `'${lineId}`) : "-";
 
         try {
           await sheets.spreadsheets.values.append({
@@ -193,8 +271,8 @@ export async function POST(req: NextRequest) {
             insertDataOption: "INSERT_ROWS",
             requestBody: {
               values: [[
-                timestamp, firstName, lastName, shopName, phone,
-                lineId, zone, zoneName, category,
+                timestamp, firstName, lastName, shopName, formattedPhone,
+                formattedLineId, zone, zoneName, category,
                 boothCount, totalFull, totalDeposit, slipUrl
               ]],
             },
