@@ -110,8 +110,15 @@ export async function POST(req: NextRequest) {
                     mimeType: slipFile.type || "image/jpeg",
                     base64: buffer.toString("base64"),
                   }),
+                  redirect: "follow",
                 });
-                const gasData = await gasRes.json();
+                const text = await gasRes.text();
+                let gasData: any = null;
+                try {
+                  gasData = JSON.parse(text);
+                } catch (pe) {
+                  if (text.startsWith("http")) gasData = { url: text.trim() };
+                }
                 if (gasData?.url) {
                   slipUrl = gasData.url;
                 }
