@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -9,6 +9,14 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [siteConfig, setSiteConfig] = useState<any>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("kmf_site_config");
+      if (saved) setSiteConfig(JSON.parse(saved));
+    } catch (e) {}
+  }, []);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -283,12 +291,16 @@ export default function RegisterPage() {
                     <span className="font-bold text-sm text-blue-900">📍 ตำแหน่งและผังเฉพาะของโซน {formData.zone}</span>
                     <span className="text-xs font-bold bg-blue-600 text-white px-2 py-0.5 rounded">แผนผังโซน</span>
                   </div>
-                  <div className="h-32 border-2 border-dashed border-blue-300 rounded-xl bg-white flex items-center justify-center text-center p-4">
-                    <div className="text-slate-500 text-xs">
-                      <span className="text-2xl block mb-1">🗺️</span>
-                      <strong className="text-blue-900 text-sm">{zones[formData.zone as keyof typeof zones]?.name}</strong>
-                      <p className="text-slate-500 mt-1">{zones[formData.zone as keyof typeof zones]?.mapDesc}</p>
-                    </div>
+                  <div className="min-h-[140px] border-2 border-dashed border-blue-300 rounded-xl bg-white flex items-center justify-center text-center p-4">
+                    {siteConfig?.zoneMaps?.[formData.zone] ? (
+                      <img src={siteConfig.zoneMaps[formData.zone]} alt={`Zone ${formData.zone}`} className="max-h-56 object-contain rounded-lg" />
+                    ) : (
+                      <div className="text-slate-500 text-xs">
+                        <span className="text-2xl block mb-1">🗺️</span>
+                        <strong className="text-blue-900 text-sm">{zones[formData.zone as keyof typeof zones]?.name}</strong>
+                        <p className="text-slate-500 mt-1">{zones[formData.zone as keyof typeof zones]?.mapDesc}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -400,22 +412,26 @@ export default function RegisterPage() {
                   <div>
                     <p className="font-extrabold text-blue-900 mb-3 text-lg">สแกน QR Code เพื่อชำระเงินมัดจำ</p>
                     <div className="w-56 h-56 bg-white mx-auto flex items-center justify-center border-4 border-white shadow-lg rounded-2xl p-2">
-                      <div className="w-full h-full border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center flex-col text-slate-400">
-                        <span className="text-3xl mb-2">📱</span>
-                        <span className="text-sm font-bold text-slate-700">QR Code พร้อมเพย์</span>
-                        <span className="text-sm text-red-600 font-extrabold mt-1">฿{(calculateTotal() / 2).toLocaleString()}</span>
-                      </div>
+                      {siteConfig?.qrCode ? (
+                        <img src={siteConfig.qrCode} alt="PromptPay QR Code" className="w-full h-full object-contain rounded-xl" />
+                      ) : (
+                        <div className="w-full h-full border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center flex-col text-slate-400">
+                          <span className="text-3xl mb-2">📱</span>
+                          <span className="text-sm font-bold text-slate-700">QR Code พร้อมเพย์</span>
+                          <span className="text-sm text-red-600 font-extrabold mt-1">฿{(calculateTotal() / 2).toLocaleString()}</span>
+                        </div>
+                      )}
                     </div>
                     <div className="mt-4 text-xs font-medium text-blue-900 bg-white inline-block px-4 py-2 rounded-xl shadow-sm border border-blue-100">
-                      พร้อมเพย์: <span className="font-bold text-sm text-blue-700">08X-XXX-XXXX</span> (บจก. โคราช มูฟวี่ เฟสติวัล)
+                      พร้อมเพย์: <span className="font-bold text-sm text-blue-700">{siteConfig?.bankInfo?.promptPayNumber || "08X-XXX-XXXX"}</span> ({siteConfig?.bankInfo?.accountName || "บจก. โคราช มูฟวี่ เฟสติวัล"})
                     </div>
                   </div>
                 ) : (
                   <div className="text-left space-y-3 bg-white p-5 rounded-xl border border-blue-100">
                     <p className="font-bold text-blue-900 text-center border-b pb-2">รายละเอียดบัญชีธนาคารสำหรับโอนเงิน</p>
-                    <div className="flex justify-between text-sm"><span className="text-slate-500">ธนาคาร:</span><span className="font-bold">กสิกรไทย (KBANK)</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-slate-500">เลขที่บัญชี:</span><span className="font-bold text-blue-700 text-base">123-4-56789-0</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-slate-500">ชื่อบัญชี:</span><span className="font-bold">บจก. โคราช มูฟวี่ เฟสติวัล</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">ธนาคาร:</span><span className="font-bold">{siteConfig?.bankInfo?.bankName || "กสิกรไทย (KBANK)"}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">เลขที่บัญชี:</span><span className="font-bold text-blue-700 text-base">{siteConfig?.bankInfo?.accountNumber || "123-4-56789-0"}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-slate-500">ชื่อบัญชี:</span><span className="font-bold">{siteConfig?.bankInfo?.accountName || "บจก. โคราช มูฟวี่ เฟสติวัล"}</span></div>
                     <div className="flex justify-between text-sm pt-2 border-t"><span className="text-slate-500">ยอดเงินที่ต้องโอน:</span><span className="font-bold text-red-600 text-base">฿{(calculateTotal() / 2).toLocaleString()} บาท</span></div>
                   </div>
                 )}

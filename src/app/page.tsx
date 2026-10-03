@@ -122,8 +122,13 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="text-center text-slate-400 text-sm py-8">
-        &copy; 2026 KORAT MOVIE FESTIVAL · NEO CINEMA CARNIVAL
+      <footer className="text-center text-slate-400 text-sm py-8 space-y-2">
+        <p>&copy; 2026 KORAT MOVIE FESTIVAL · NEO CINEMA CARNIVAL</p>
+        <p>
+          <Link href="/admin" className="text-xs text-slate-500 hover:text-amber-400 transition font-medium">
+            🔒 เข้าสู่ระบบผู้ดูแล (Admin Login)
+          </Link>
+        </p>
       </footer>
     </div>
   );
