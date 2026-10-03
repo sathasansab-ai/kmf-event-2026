@@ -86,39 +86,72 @@ export async function POST(req: NextRequest) {
           console.warn("Drive folder create warning:", folderErr.message);
         }
 
-        // 2. อัปโหลดไฟล์สลิปลงในโฟลเดอร์ชื่อร้าน
+        // 2. อัปโหลดไฟล์สลิปลงในโฟลเดอร์ชื่อร้าน (ใช้ ASCII filename ป้องกัน Header Encoding Error)
         if (slipFile && slipFile.size > 0) {
           try {
             const arrayBuffer = await slipFile.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
-            const stream = Readable.from(buffer);
+            const stream = new Readable();
+            stream.push(buffer);
+            stream.push(null);
 
-            const ext = slipFile.name.split(".").pop() || "jpg";
-            const uploaded = await drive.files.create({
-              requestBody: {
-                name: `slip_${shopName}_${Date.now()}.${ext}`,
-                parents: [shopFolderId],
-              },
-              media: {
-                mimeType: slipFile.type || "image/jpeg",
-                body: stream,
-              },
-              fields: "id, webViewLink, webContentLink",
-            });
+            const rawExt = (slipFile.name || "").split(".").pop()?.toLowerCase() || "jpg";
+            const safeExt = ["jpg", "jpeg", "png", "webp", "pdf"].includes(rawExt) ? rawExt : "jpg";
+            const safeFileName = `slip_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${safeExt}`;
 
-            slipUrl = uploaded.data.webViewLink || uploaded.data.webContentLink || `https://drive.google.com/file/d/${uploaded.data.id}/view`;
-
-            // พยายามตั้งสิทธิ์ให้เปิดดูได้ (หากทำได้)
+            // อัปโหลดไฟล์สลิป (เปิด supportsAllDrives ป้องกันกรณี Shared Folder)
+            let uploaded: any = null;
             try {
-              await drive.permissions.create({
-                fileId: uploaded.data.id!,
-                requestBody: { role: "reader", type: "anyone" },
+              uploaded = await drive.files.create({
+                requestBody: {
+                  name: safeFileName,
+                  parents: [shopFolderId],
+                  description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
+                },
+                media: {
+                  mimeType: slipFile.type || "image/jpeg",
+                  body: stream,
+                },
+                fields: "id, name, webViewLink, webContentLink",
+                supportsAllDrives: true,
               });
-            } catch (permErr) {
-              // ละเว้นหาก permission ของ folder ควบคุมอยู่แล้ว
+            } catch (folderUploadErr: any) {
+              console.warn("Upload to shop folder failed, trying root folder:", folderUploadErr?.message);
+              // Fallback: หากอัปโหลดลงโฟลเดอร์ย่อยมีปัญหา ให้เซฟลงโฟลเดอร์หลักทันทีเพื่อไม่ให้สลิปหาย
+              const fallbackStream = new Readable();
+              fallbackStream.push(buffer);
+              fallbackStream.push(null);
+              uploaded = await drive.files.create({
+                requestBody: {
+                  name: safeFileName,
+                  parents: [DRIVE_FOLDER_ID],
+                  description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
+                },
+                media: {
+                  mimeType: slipFile.type || "image/jpeg",
+                  body: fallbackStream,
+                },
+                fields: "id, name, webViewLink, webContentLink",
+                supportsAllDrives: true,
+              });
+            }
+
+            if (uploaded?.data?.id) {
+              slipUrl = `https://drive.google.com/file/d/${uploaded.data.id}/view?usp=sharing`;
+
+              // พยายามตั้งสิทธิ์ให้อ่านได้ผ่านลิงก์
+              try {
+                await drive.permissions.create({
+                  fileId: uploaded.data.id,
+                  requestBody: { role: "reader", type: "anyone" },
+                  supportsAllDrives: true,
+                });
+              } catch (permErr: any) {
+                console.warn("Drive permission create warning:", permErr?.message);
+              }
             }
           } catch (uploadErr: any) {
-            console.error("Slip upload error:", uploadErr.message);
+            console.error("Slip upload critical error:", uploadErr);
           }
         }
 

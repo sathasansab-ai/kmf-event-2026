@@ -93,9 +93,61 @@ export default function RegisterPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSlipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // บีบอัดสลิปอัตโนมัติก่อนส่งขึ้น Server ป้องกันปัญหาไฟล์เกิน 4.5MB บน Netlify
+  const compressSlipImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith("image/") || file.size < 400000) {
+        resolve(file);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          const maxDim = 1200;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                type: "image/jpeg",
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          }, "image/jpeg", 0.82);
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSlipChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData({ ...formData, slip: e.target.files[0] });
+      const rawFile = e.target.files[0];
+      const processedFile = await compressSlipImage(rawFile);
+      setFormData(prev => ({ ...prev, slip: processedFile }));
       setSubmitError("");
     }
   };

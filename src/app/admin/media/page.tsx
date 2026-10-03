@@ -40,19 +40,60 @@ export default function AdminMediaPage() {
     } catch (e) {}
   }, []);
 
-  const handleFileUpload = (
+  // ฟังก์ชันย่อขนาดภาพอัตโนมัติบนเบราว์เซอร์ เพื่อให้ไฟล์เล็กลง 90% บันทึกได้แน่นอน ไม่ติดปัญหาขนาดไฟล์
+  const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.8): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxWidth || height > maxHeight) {
+            if (width / height > maxWidth / maxHeight) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(e.target?.result as string);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          // ใช้ JPEG คุณภาพ 0.8 เพื่อประหยัดพื้นที่จัดเก็บสูงสุด
+          const compressed = canvas.toDataURL("image/jpeg", quality);
+          resolve(compressed);
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve("");
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    setter: (base64: string) => void
+    setter: (base64: string) => void,
+    maxWidth = 1200,
+    maxHeight = 1200
   ) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setter(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file, maxWidth, maxHeight, 0.8);
+        setter(compressedBase64);
+      } catch (err) {
+        console.error("Image compression error, falling back to raw:", err);
+      }
     }
   };
 
@@ -70,7 +111,7 @@ export default function AdminMediaPage() {
       setSavedMsg("บันทึกรูปภาพ โปสเตอร์ ผังงาน และข้อมูลบัญชีเรียบร้อยแล้ว! ข้อมูลจะแสดงผลทันที");
       setTimeout(() => setSavedMsg(""), 4000);
     } catch (err) {
-      alert("ไฟล์รูปภาพอาจมีขนาดใหญ่เกินไป แนะนำให้บีบอัดรูปภาพก่อนอัปโหลดครับ");
+      alert("ไม่สามารถบันทึกได้ กรุณาลองอัปโหลดรูปใหม่อีกครั้งครับ");
     }
   };
 
