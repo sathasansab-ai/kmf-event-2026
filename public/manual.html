@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คู่มือการใช้งานระบบรับสมัครร้านค้า & ระบบหลังบ้าน - KMF 2026</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap');
+
+    :root {
+      --primary: #1F5B5A;
+      --amber: #F2A11B;
+      --dark: #1B1B1B;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text: #334155;
+      --title: #0F172A;
+      --border: #E2E8F0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sarabun', 'Segoe UI', Tahoma, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 48px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+
+    /* Action Bar (Top Floating) */
+    .action-bar {
+      position: sticky;
+      top: 16px;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 14px 24px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-word {
+      background: #2B579A;
+      color: #fff;
+    }
+    .btn-word:hover {
+      background: #1E3F72;
+      transform: translateY(-1px);
+    }
+
+    .btn-pdf {
+      background: #E11D48;
+      color: #fff;
+    }
+    .btn-pdf:hover {
+      background: #BE123C;
+      transform: translateY(-1px);
+    }
+
+    /* Document Header */
+    .doc-header {
+      text-align: center;
+      padding-bottom: 32px;
+      border-bottom: 2px solid #F1F5F9;
+      margin-bottom: 36px;
+    }
+
+    .tag-badge {
+      display: inline-block;
+      background: #FEF3C7;
+      color: #B45309;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--title);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .doc-subtitle {
+      font-size: 16px;
+      color: #64748B;
+      font-weight: 600;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 40px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1E293B;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+    }
+
+    ul, ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* Cards & Callouts */
+    .callout {
+      background: #F0FDF4;
+      border-left: 4px solid #16A34A;
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #14532D;
+    }
+
+    .callout-blue {
+      background: #EFF6FF;
+      border-left: 4px solid #2563EB;
+      color: #1E3A8A;
+    }
+
+    .callout-amber {
+      background: #FFFBEB;
+      border-left: 4px solid #F59E0B;
+      color: #78350F;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #F8FAFC;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) {
+      background-color: #F8FAFC;
+    }
+
+    code {
+      background: #F1F5F9;
+      color: #0F172A;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    pre {
+      background: #1E293B;
+      color: #E2E8F0;
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      .container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      h2 {
+        page-break-after: avoid;
+      }
+      table, pre, .callout {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Action Bar -->
+  <div class="action-bar" id="actionBar">
+    <div>
+      <strong style="color: #0F172A; font-size: 15px;">คู่มือการใช้งานระบบ KMF 2026</strong>
+      <span style="color: #64748B; font-size: 13px; margin-left: 8px;">(ระบบจัดการหลังบ้าน & ผู้สมัคร)</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-word" onclick="exportToWord()">
+        <span>📄</span> ส่งออกเป็น Word (.doc)
+      </button>
+      <button class="btn btn-pdf" onclick="window.print()">
+        <span>🖨️</span> พิมพ์ / เซฟเป็น PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="container" id="manualContent">
+    
+    <!-- Document Header -->
+    <div class="doc-header">
+      <div class="tag-badge">KORAT MOVIE FESTIVAL 2026 · ADMIN MANUAL</div>
+      <h1>คู่มือการใช้งานระบบรับสมัครร้านค้า &amp; จัดการหลังบ้าน</h1>
+      <p class="doc-subtitle">NEO CINEMA CARNIVAL : ดูด้วยกัน · ตลาดน้ำบึงหัวทะเล โคราช</p>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="callout callout-blue">
+      <h3 style="margin-top: 0; color: #1E3A8A; font-size: 16px;">📑 สารบัญด่วน</h3>
+      <ol style="margin-bottom: 0;">
+        <li><a href="#section-1" style="color: #2563EB; font-weight: 600;">ภาพรวมสถาปัตยกรรมระบบ (System Architecture)</a></li>
+        <li><a href="#section-2" style="color: #2563EB; font-weight: 600;">คู่มือระบบจัดการหลังบ้านสำหรับ Admin (เน้นพิเศษ)</a>
+          <ul style="margin-top: 4px;">
+            <li>หน้าแดชบอร์ดสรุปสถิติ (<code>/admin</code>)</li>
+            <li>หน้ารายชื่อร้านค้าและตรวจสอบสลิป (<code>/admin/vendors</code>)</li>
+            <li>หน้าจัดการโซน ราคา โควต้า และสิทธิประโยชน์ (<code>/admin/zones</code>)</li>
+            <li>หน้าจัดการสื่อ โปสเตอร์ ผังงาน และบัญชีธนาคาร (<code>/admin/media</code>)</li>
+          </ul>
+        </li>
+        <li><a href="#section-3" style="color: #2563EB; font-weight: 600;">คู่มือและขั้นตอนฝั่งร้านค้าผู้สมัคร (Vendor Registration Flow)</a></li>
+        <li><a href="#section-4" style="color: #2563EB; font-weight: 600;">โครงสร้างการจัดเก็บใน Google Sheets &amp; Google Drive</a></li>
+        <li><a href="#section-5" style="color: #2563EB; font-weight: 600;">การบำรุงรักษาระบบและการแก้ไขปัญหา (Troubleshooting &amp; FAQ)</a></li>
+      </ol>
+    </div>
+
+    <!-- Section 1 -->
+    <h2 id="section-1">1. ภาพรวมสถาปัตยกรรมระบบ (System Architecture)</h2>
+    <p>ระบบลงทะเบียนร้านค้างาน <strong>Korat Movie Festival 2026</strong> ถูกออกแบบขึ้นเพื่อให้สามารถทำงานได้แบบอัตโนมัติเต็มรูปแบบ โดยมีคุณสมบัติเด่นดังนี้:</p>
+    <ul>
+      <li><strong>Frontend / Backend Logic:</strong> พัฒนาบน Next.js App Router (TypeScript + Tailwind CSS) รองรับทั้งจอมือถือและคอมพิวเตอร์</li>
+      <li><strong>ฐานข้อมูลเรียลไทม์ (Database):</strong> ใช้งาน Google Sheets โดยตรงเป็นฐานข้อมูลหลัก บันทึกข้อมูลได้ทันทีโดยไม่ต้องพึ่งพาเซิร์ฟเวอร์ฐานข้อมูลภายนอก</li>
+      <li><strong>การจัดเก็บไฟล์สลิป (Storage):</strong> รูปภาพสลิปจะถูกส่งไปจัดเก็บใน Google Drive ของผู้จัดงาน โดยแยกโฟลเดอร์ตามชื่อร้านค้าให้อัตโนมัติ</li>
+      <li><strong>ระบบบายพาส Quota:</strong> ใช้งานผ่าน Google Apps Script Web App เพื่อให้ระบบรันภายใต้โควต้าบัญชี Gmail 15 GB ฟรีของผู้จัดงาน หมดปัญหา Service Account Quota</li>
+      <li><strong>ระบบซิงค์คลาวด์ทั่วโลก (Global Cloud Config):</strong> ทุกครั้งที่ Admin ปรับเปลี่ยนราคา, โควต้า, บัญชีธนาคาร, สิทธิประโยชน์ หรือรูปภาพ ข้อมูลจะถูกบันทึกลงแท็บ <code>Config</code> ใน Google Sheets ทำให้ทุกอุปกรณ์ทั่วโลกมองเห็นข้อมูลตรงกันทันที 100%</li>
+    </ul>
+
+    <!-- Section 2 -->
+    <h2 id="section-2">2. คู่มือระบบจัดการหลังบ้านสำหรับ Admin (Admin Management Portal)</h2>
+    
+    <div class="callout">
+      <strong>🔗 ทางเข้าสู่ระบบหลังบ้าน:</strong><br>
+      Admin สามารถเปิดเข้าใช้งานได้จากทุกที่ ผ่านลิงก์: <code>https://ชื่อเว็บของคุณ.netlify.app/admin</code>
+    </div>
+
+    <h3>2.1 หน้าภาพรวมแดชบอร์ด (Dashboard) - <code>/admin</code></h3>
+    <p>หน้านี้เป็นหน้าแรกเมื่อเข้าสู่ระบบหลังบ้าน ออกแบบมาเพื่อให้ผู้บริหารและคณะทำงานดูภาพรวมได้ทันที:</p>
+    <ul>
+      <li><strong>การ์ดตัวเลขสรุป 4 ช่อง:</strong>
+        <ol>
+          <li><strong>ร้านค้าที่สมัครแล้ว:</strong> จำนวนร้านค้าทั้งหมดที่ส่งใบสมัครเข้ามาสำเร็จ</li>
+          <li><strong>ยอดมัดจำรวมที่ได้รับ (50%):</strong> ยอดเงินมัดจำจริงที่โอนเข้ามาในระบบ</li>
+          <li><strong>รายได้เต็มจำนวนที่คาดการณ์:</strong> ยอดรวม 100% เมื่อร้านค้าชำระเงินส่วนที่เหลือในวันจัดงาน</li>
+          <li><strong>จำนวนล็อคที่จองแล้ว:</strong> ยอดรวมล็อคที่ถูกจองไปแล้ว เทียบกับโควต้าทั้งหมด</li>
+        </ol>
+      </li>
+      <li><strong>แถบความคืบหน้าของแต่ละโซน (A, B, C, D):</strong> โชว์สถานะการจองแบบแยกโซน เช่น จองแล้ว 20/30 ล็อค พร้อมแถบเปอร์เซ็นต์สีสันสวยงาม</li>
+      <li><strong>🤝 ตารางสรุปผลงานผู้แนะนำร้านค้า &amp; ค่าตอบแทน 10% (เฉพาะ Admin):</strong>
+        <ul>
+          <li><strong>ลีดเดอร์บอร์ดจัดอันดับ:</strong> แสดงลำดับผู้ที่หาร้านค้ามาได้มากที่สุด พร้อมเหรียญ 🥇, 🥈, 🥉</li>
+          <li><strong>สรุปสถิติ:</strong> จำนวนร้านที่หาได้, จำนวนล็อครวม, รายชื่อร้านค้าที่แนะนำมาทั้งหมด</li>
+          <li><strong>คำนวณค่าตอบแทน 10% อัตโนมัติ:</strong> คำนวณส่วนแบ่ง 10% จากยอดขายราคาเต็มของล็อคที่แนะนำมาให้ทันที พร้อมยอดรวมค่าตอบแทนทั้งสิ้น</li>
+          <li><strong>ความปลอดภัย:</strong> ซ่อนเป็นความลับเฉพาะทีม Admin เท่านั้น ผู้สมัครหน้าร้านจะไม่เห็นข้อมูลส่วนนี้</li>
+        </ul>
+      </li>
+      <li><strong>ตารางร้านค้าล่าสุด:</strong> แสดงรายชื่อร้านค้าที่เพิ่งสมัครเข้ามาล่าสุด พร้อมผู้แนะนำ โซน ยอดเงินมัดจำ และปุ่มเปิดดูรูปสลิป</li>
+      <li><strong>ปุ่ม "🔄 รีเฟรชข้อมูล":</strong> คลิกเมื่อต้องการดึงข้อมูลล่าสุดจาก Google Sheets ทันที</li>
+    </ul>
+
+    <h3>2.2 หน้ารายชื่อร้านค้าและตรวจสอบสลิป (Vendors) - <code>/admin/vendors</code></h3>
+    <p>หน้านี้มีไว้สำหรับทีมงานในการตรวจสอบยอดเงินและเตรียมดึงร้านค้าเข้ากลุ่ม Line:</p>
+    <ul>
+      <li><strong>แถบกรองโซน (Filter Tabs):</strong> คลิกเพื่อสลับดูเฉพาะ: <em>ทั้งหมด</em>, <em>Zone A</em>, <em>Zone B</em>, <em>Zone C</em> หรือ <em>Zone D</em></li>
+      <li><strong>คอลัมน์ข้อมูลในตาราง:</strong>
+        <ul>
+          <li><strong>วันเวลาสมัคร:</strong> บันทึกตามเวลาประเทศไทย</li>
+          <li><strong>ชื่อร้านค้า:</strong> ชื่อป้ายร้าน</li>
+          <li><strong>ข้อมูลติดต่อ:</strong> ชื่อ-นามสกุล, เบอร์โทรศัพท์ (มีเลข 0 นำหน้าเสมอ), Line ID</li>
+          <li><strong>โซนและสิทธิประโยชน์:</strong> แสดงโซน หมวดหมู่สินค้า พร้อมป้ายสิทธิประโยชน์ที่ร้านจะได้รับ</li>
+          <li><strong>จำนวนล็อค:</strong> จำนวนล็อคที่ขอจอง</li>
+          <li><strong>ยอดมัดจำ 50%:</strong> ยอดที่ต้องตรวจเช็คกับสลิป</li>
+          <li><strong>ปุ่ม "🔍 ดูสลิป (Drive)":</strong> เมื่อคลิกปุ่มนี้ ระบบจะเปิดภาพถ่ายสลิปที่อยู่ใน Google Drive ขึ้นมาให้ตรวจสอบความถูกต้องทันที ซูมดูเวลาและยอดเงินได้ชัดเจน</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>2.3 หน้าจัดการโซน ราคา โควต้า และสิทธิประโยชน์ - <code>/admin/zones</code></h3>
+    <p>หน้านี้เป็นหัวใจหลักในการตั้งค่าเปิด-ปิดรับสมัครร้านค้า:</p>
+    <ul>
+      <li><strong>💰 ปรับราคาต่อล็อค:</strong> กรอกราคาเต็มของแต่ละโซน เช่น <code>3500</code> หรือ <code>2500</code> (ระบบจะคำนวณยอดมัดจำ 50% ให้โดยอัตโนมัติ)</li>
+      <li><strong>🎪 โควต้าเปิดรับทั้งหมด (ล็อค):</strong> กำหนดจำนวนล็อคสูงสุดที่เปิดรับในโซนนั้น เช่น <code>30</code> ล็อค</li>
+      <li><strong>👥 จำนวนจองแล้ว:</strong> ดึงตามยอดจริง หรือ Admin สามารถใส่ตัวเลขเพื่อกันล็อคไว้ได้เอง</li>
+      <li><strong>🎁 ระบบจัดการสิทธิประโยชน์ / สิ่งที่จะได้รับ (Benefits Manager):</strong>
+        <ul>
+          <li><strong>ดูรายการสิทธิประโยชน์:</strong> แสดงเป็นป้ายสีเขียว เช่น <code>✓ เต็นท์ขนาด 2x2 เมตร</code>, <code>✓ หลอดไฟส่องสว่าง 1 จุด</code></li>
+          <li><strong>ลบรายการ:</strong> คลิกปุ่ม <strong>✕</strong> บนป้ายที่ต้องการตัดออก</li>
+          <li><strong>เพิ่มรายการใหม่:</strong> พิมพ์ข้อความในช่อง เช่น <code>ระบบไฟฟ้า (4.5 แอมป์)</code> หรือ <code>โต๊ะ 1 เก้าอี้ 2</code> แล้วกดปุ่ม <strong>"➕ เพิ่ม"</strong></li>
+          <li><strong>ปุ่มลัดเพิ่มด่วน (Quick Presets):</strong> คลิกปุ่ม Preset ด้านล่างเพื่อเพิ่มสิ่งของยอดนิยมได้ใน 1 วินาที</li>
+        </ul>
+      </li>
+      <li><strong>💾 บันทึกการเปลี่ยนแปลง:</strong> คลิกปุ่มสีน้ำเงินด้านบนขวา ข้อมูลจะถูกบันทึกลง Google Sheets และส่งผลไปยังหน้าสมัครของร้านค้าทันที!</li>
+    </ul>
+
+    <h3>2.4 หน้าจัดการสื่อ โปสเตอร์ ผังงาน และบัญชีธนาคาร - <code>/admin/media</code></h3>
+    <p>ใช้สำหรับปรับเปลี่ยนภาพลักษณ์ของเว็บและช่องทางการรับเงิน:</p>
+    <ul>
+      <li><strong>🖼️ โปสเตอร์งาน KMF 2026:</strong> อัปโหลดรูปภาพโปสเตอร์จริง ภาพนี้จะถูกนำไปแสดงเป็น <strong>Pop-up อัตโนมัติ</strong> เมื่อมีผู้เข้าชมหน้าแรกของเว็บไซต์</li>
+      <li><strong>🎬 โลโก้งาน:</strong> อัปโหลดโลโก้งานเพื่อไปโชว์ที่ส่วนหัวของแบบฟอร์มการรับสมัคร</li>
+      <li><strong>🗺️ ผังพื้นที่จัดงานรวม 14 โซน:</strong> อัปโหลดภาพแผนผังงานรวมรอบบึงหัวทะเล ร้านค้าจะเห็นภาพนี้ในขั้นตอนที่ 2 ของการสมัคร</li>
+      <li><strong>📍 ผังเฉพาะโซน (Zone Maps A, B, C, D):</strong> อัปโหลดผังเจาะลึกเฉพาะแต่ละโซน เมื่อร้านค้ากดเลือกโซน A ผังโซน A จะสลับขึ้นมาให้ดูทันที</li>
+      <li><strong>📱 ภาพ QR Code รับเงิน:</strong> อัปโหลดรูปคิวอาร์โค้ด PromptPay สำหรับสแกนจ่ายเงิน</li>
+      <li><strong>🏦 ข้อมูลบัญชีธนาคาร:</strong> ระบุชื่อธนาคาร, เลขที่บัญชี, ชื่อบัญชี และเบอร์พร้อมเพย์</li>
+      <li><strong>ระบบย่อขนาดภาพอัตโนมัติ:</strong> เบราว์เซอร์จะย่อรูปให้มีขนาดกะทัดรัด คมชัด และประหยัดพื้นที่จัดเก็บบน Google Sheets</li>
+      <li><strong>💾 ปุ่มบันทึกการตั้งค่าทั้งหมด:</strong> คลิกเพื่อบันทึกการตั้งค่าทั้งหมดขึ้นคลาวด์</li>
+    </ul>
+
+    <!-- Section 3 -->
+    <h2 id="section-3">3. คู่มือและขั้นตอนฝั่งร้านค้าผู้สมัคร (Vendor Flow)</h2>
+    <ol>
+      <li><strong>หน้าแรก (Landing Page):</strong>
+        <ul>
+          <li>เปิดหน้าเว็บมาจะพบกับ Pop-up โปสเตอร์งาน สามารถกดปิดหรือกด <strong>"จองล็อคทันที 🎟️"</strong> ได้</li>
+          <li>มีข้อมูลธีมงาน ไฮไลต์ 14 โซน และการ์ดแสดงราคาแต่ละโซน</li>
+        </ul>
+      </li>
+      <li><strong>ขั้นตอนที่ 1 (กรอกข้อมูล):</strong> ร้านค้ากรอกชื่อ-นามสกุล, ชื่อร้านค้า, เบอร์โทร (มีเลข 0), Line ID และ <strong>ผู้แนะนำ (ผู้แนะนำให้มาสมัคร)</strong> ซึ่งเป็นช่องจำเป็นต้องระบุ หากไม่มีผู้แนะนำสามารถพิมพ์หรือกดปุ่ม <code>[กดใส่ "ไม่มี"]</code> ได้</li>
+      <li><strong>ขั้นตอนที่ 2 (เลือกโซน &amp; สินค้า):</strong>
+        <ul>
+          <li>ดูผังงานรวม 14 โซน และคลิกเลือกโซนที่ต้องการ</li>
+          <li>เมื่อคลิกโซนใด จะมี <strong>ผังเฉพาะโซน</strong> และกล่อง <strong>🎁 สิทธิประโยชน์ที่จะได้รับ</strong> ปรากฏขึ้นมาให้เห็นชัดเจน</li>
+          <li>เลือกประเภทสินค้า และเลือกจำนวนล็อคที่ต้องการ (1 - 5 ล็อค)</li>
+        </ul>
+      </li>
+      <li><strong>ขั้นตอนที่ 3 (สรุปตั๋ว &amp; ชำระเงิน):</strong>
+        <ul>
+          <li>หน้าสรุปยอดทำเป็นดีไซน์ <strong>Ticket ตั๋วหนัง</strong> แสดงยอดเต็ม และขีดฆ่าแสดง <strong>ยอดมัดจำ 50%</strong></li>
+          <li>มีกล่องแสดงสิทธิประโยชน์ที่รวมอยู่ในราคานี้</li>
+          <li>เลือกว่าจะสแกน QR Code หรือโอนผ่านเลขที่บัญชีธนาคาร</li>
+          <li>แนบไฟล์รูปภาพสลิปหลักฐานการโอนเงิน แล้วกด <strong>"ส่งข้อมูลสมัครร้านค้า ✔️"</strong></li>
+        </ul>
+      </li>
+      <li><strong>หน้าส่งใบสมัครสำเร็จ (Confirmation):</strong>
+        <ul>
+          <li>แสดงการ์ดยืนยันพร้อมเครื่องหมายถูกสีเขียว</li>
+          <li>แสดงชื่อร้าน, ผู้สมัคร, เบอร์โทร, Line ID, โซน, จำนวนล็อค, ยอดมัดจำ</li>
+          <li><strong>🎁 แสดงรายการสิทธิประโยชน์ / สิ่งที่จะได้รับในโซนนั้นอย่างละเอียด</strong></li>
+          <li>แจ้งขั้นตอนถัดไป: ทีมงานจะตรวจสอบสลิปและดึงเข้ากลุ่ม Line ภายใน 24 ชม.</li>
+        </ul>
+      </li>
+    </ol>
+
+    <!-- Section 4 -->
+    <h2 id="section-4">4. โครงสร้างการจัดเก็บข้อมูลใน Google Sheets &amp; Drive</h2>
+    
+    <h3>4.1 โครงสร้างคอลัมน์ A ถึง O ใน Google Sheets</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>คอลัมน์</th>
+          <th>ชื่อหัวตาราง</th>
+          <th>รายละเอียดการจัดเก็บ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>A</strong></td><td>วันเวลาที่สมัคร</td><td>วันและเวลาที่กดส่งใบสมัคร (เวลาไทย เช่น 4/10/2569 14:15:30)</td></tr>
+        <tr><td><strong>B</strong></td><td>ชื่อผู้สมัคร</td><td>ชื่อจริงของผู้ประสานงาน</td></tr>
+        <tr><td><strong>C</strong></td><td>นามสกุล</td><td>นามสกุลของผู้ประสานงาน</td></tr>
+        <tr><td><strong>D</strong></td><td>ชื่อร้านค้า</td><td>ชื่อร้านที่จะนำไปทำป้ายในงาน</td></tr>
+        <tr><td><strong>E</strong></td><td>เบอร์โทรศัพท์</td><td>เบอร์ติดต่อ (มีสัญลักษณ์ <code>'</code> นำหน้า ทำให้เลข 0 ตัวแรกไม่หาย)</td></tr>
+        <tr><td><strong>F</strong></td><td>Line ID</td><td>Line ID สำหรับดึงเข้ากลุ่มประสานงาน</td></tr>
+        <tr><td><strong>G</strong></td><td>โซน</td><td>รหัสโซน (A, B, C, D)</td></tr>
+        <tr><td><strong>H</strong></td><td>ชื่อโซน</td><td>ชื่อเต็มของโซน (เช่น ถนนคนเดิน (FESTIVAL MARKET))</td></tr>
+        <tr><td><strong>I</strong></td><td>ประเภทสินค้า</td><td>หมวดหมู่สินค้าที่เลือกจำหน่าย</td></tr>
+        <tr><td><strong>J</strong></td><td>จำนวนล็อค</td><td>จำนวนล็อคที่จอง (1 - 5 ล็อค)</td></tr>
+        <tr><td><strong>K</strong></td><td>ราคาเต็มรวม (บาท)</td><td>ยอดรวม 100%</td></tr>
+        <tr><td><strong>L</strong></td><td>ยอดมัดจำ 50% (บาท)</td><td>ยอดเงินมัดจำที่ร้านต้องโอน</td></tr>
+        <tr><td><strong>M</strong></td><td>หลักฐานการโอนเงิน (สลิป)</td><td>ลิงก์ตรงสำหรับเปิดดูรูปสลิปใน Google Drive</td></tr>
+        <tr><td><strong>N</strong></td><td>สิทธิประโยชน์และสิ่งที่จะได้รับ</td><td>รายการสิทธิประโยชน์ที่ร้านได้รับ (เช่น เต็นท์, ไฟฟ้า, หลอดไฟ)</td></tr>
+        <tr><td><strong>O</strong></td><td>ผู้แนะนำ</td><td>ชื่อผู้แนะนำให้มาสมัคร หรือ "ไม่มี"</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4.2 แท็บการตั้งค่ากลาง (Config Sheet)</h3>
+    <p>ระบบมีแท็บเฉพาะชื่อ <strong>`Config`</strong> ทำหน้าที่เป็นคลาวด์สำหรับเก็บค่าการตั้งค่าโซน ราคา โควต้า สื่อ และบัญชีธนาคาร รองรับการแยกเก็บข้อมูลขนาดใหญ่ (Chunking) ป้องกันการสูญหายของข้อมูล ทำให้ทุกเครื่องเห็นตรงกัน</p>
+
+    <h3>4.3 การจัดเก็บสลิปใน Google Drive ด้วย Google Apps Script</h3>
+    <p>ระบบส่งข้อมูลรูปภาพสลิปผ่าน Webhook ไปยัง Google Apps Script ที่ติดตั้งไว้ในบัญชี Google Workspace/Gmail ของผู้จัดงาน:</p>
+    <ul>
+      <li>ระบบสร้างโฟลเดอร์แยกตาม <strong>"ชื่อร้านค้า"</strong> ให้อัตโนมัติใน Google Drive</li>
+      <li>ตั้งชื่อไฟล์สลิปอย่างเป็นระเบียบ เช่น <code>slip_1791097452024_x8a2f.jpg</code></li>
+      <li>ตั้งสิทธิ์การเข้าถึงให้สามารถกดเปิดดูผ่านลิงก์ในหน้า Admin ได้ทันที</li>
+    </ul>
+
+    <!-- Section 5 -->
+    <h2 id="section-5">5. การบำรุงรักษาระบบและการแก้ไขปัญหา (Troubleshooting &amp; FAQ)</h2>
+
+    <div class="callout callout-amber">
+      <strong>🔍 ลิงก์ตรวจสอบสุขภาพระบบ (Diagnostic Tool):</strong><br>
+      เปิดเบราว์เซอร์ไปที่: <code>https://ชื่อเว็บของคุณ.netlify.app/api/test-drive</code><br>
+      หากหน้าจอแสดง <code>"ready": true</code> และ <code>"appsScriptStatus": "SUCCESS"</code> แสดงว่าระบบสลิปและ Google Drive ทำงานสมบูรณ์ 100%
+    </div>
+
+    <h3>คำถามที่พบบ่อย (FAQ)</h3>
+    <ul>
+      <li><strong>ถาม: ร้านค้าสมัครแล้วสลิปขึ้นข้อความ Quota Error ใน Google Sheets?</strong><br>
+      <strong>ตอบ:</strong> ตรวจสอบว่าใน Netlify (Site configuration ➔ Environment variables) มีตัวแปร <code>GOOGLE_APPS_SCRIPT_URL</code> หรือไม่ และตรวจดูใน Apps Script ว่าเลือกสิทธิ์เป็น <em>"ทุกคน (Anyone)"</em> แล้วหรือยัง</li>
+      
+      <li><strong>ถาม: Admin แก้ไขราคาหรือสิทธิประโยชน์แล้ว เครื่องอื่นไม่เปลี่ยนตาม?</strong><br>
+      <strong>ตอบ:</strong> ตรวจสอบว่าในหน้า <code>/admin/zones</code> ได้กดปุ่ม <strong>"💾 บันทึกการเปลี่ยนแปลง"</strong> แล้วหรือยัง และตรวจสอบว่าโค้ดล่าสุดถูก push ขึ้น Git/Netlify เรียบร้อยแล้วหรือไม่</li>
+
+      <li><strong>ถาม: เบอร์โทรศัพท์ใน Google Sheets เลข 0 ข้างหน้าจะหายไหม?</strong><br>
+      <strong>ตอบ:</strong> ไม่หายแน่นอนครับ ระบบของเว็บได้ใส่เครื่องหมาย <code>'</code> (Single Quote) กำกับไว้ให้อัตโนมัติ ทำให้ Google Sheets จัดเก็บเป็นข้อความตัวเลขสมบูรณ์</li>
+    </ul>
+
+    <div style="text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: #94A3B8;">
+      คู่มือฉบับสมบูรณ์สำหรับคณะผู้จัดงาน เทศกาลภาพยนตร์เมืองโคราช 2026 (Korat Movie Festival)
+    </div>
+
+  </div>
+
+  <script>
+    // ฟังก์ชันส่งออกเป็นไฟล์ Microsoft Word (.doc / .docx compatible)
+    function exportToWord() {
+      const content = document.getElementById('manualContent').innerHTML;
+      
+      const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+            "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+            "xmlns='http://www.w3.org/TR/REC-html40'>" +
+            "<head><meta charset='utf-8'><title>คู่มือการใช้งานระบบ KMF 2026</title>" +
+            "<style>" +
+            "body { font-family: 'TH Sarabun New', 'Sarabun', Arial, sans-serif; font-size: 14pt; line-height: 1.5; }" +
+            "h1 { font-size: 22pt; font-weight: bold; color: #1F5B5A; text-align: center; margin-bottom: 8pt; }" +
+            "h2 { font-size: 18pt; font-weight: bold; color: #1F5B5A; border-bottom: 2pt solid #1F5B5A; margin-top: 20pt; padding-bottom: 4pt; }" +
+            "h3 { font-size: 15pt; font-weight: bold; color: #1E293B; margin-top: 14pt; }" +
+            "table { border-collapse: collapse; width: 100%; margin: 12pt 0; }" +
+            "th, td { border: 1pt solid #CBD5E1; padding: 6pt 10pt; text-align: left; }" +
+            "th { background-color: #F1F5F9; font-weight: bold; }" +
+            "code { background-color: #F1F5F9; font-family: monospace; font-size: 11pt; padding: 2pt 4pt; }" +
+            ".callout { background-color: #F0FDF4; border-left: 4pt solid #16A34A; padding: 10pt; margin: 12pt 0; }" +
+            ".tag-badge { font-weight: bold; color: #B45309; text-align: center; margin-bottom: 6pt; }" +
+            ".doc-subtitle { text-align: center; color: #64748B; margin-bottom: 20pt; }" +
+            "</style></head><body>";
+      const footer = "</body></html>";
+      
+      const sourceHTML = header + content + footer;
+      const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+      
+      const fileDownload = document.createElement("a");
+      document.body.appendChild(fileDownload);
+      fileDownload.href = source;
+      fileDownload.download = 'คู่มือการใช้งานระบบรับสมัคร_KMF_2026.doc';
+      fileDownload.click();
+      document.body.removeChild(fileDownload);
+    }
+  </script>
+</body>
+</html>

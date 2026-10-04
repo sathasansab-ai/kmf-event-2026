@@ -17,6 +17,7 @@ interface Vendor {
   totalFull: number;
   slipUrl: string;
   benefits?: string;
+  referrer?: string;
   status: "รอตรวจสอบ" | "อนุมัติแล้ว" | "ปฏิเสธ";
 }
 
@@ -125,6 +126,11 @@ export default function AdminVendorsPage() {
                       <div className="font-semibold text-slate-800">{v.ownerName}</div>
                       <div className="text-slate-500">📞 {v.phone}</div>
                       <div className="text-blue-600">💬 {v.lineId}</div>
+                      {v.referrer && v.referrer !== "ไม่มี" && (
+                        <div className="text-[11px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-semibold inline-block mt-0.5">
+                          🤝 แนะนำโดย: {v.referrer}
+                        </div>
+                      )}
                     </td>
                     <td className="p-4 text-xs">
                       <div className="flex items-center gap-1 mb-1">

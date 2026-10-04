@@ -17,6 +17,7 @@ export default function RegisterPage() {
     shopName: "",
     phone: "",
     lineId: "",
+    referrer: "",
     zone: "",
     category: "",
     boothCount: 1,
@@ -212,6 +213,7 @@ export default function RegisterPage() {
       data.append("shopName", formData.shopName);
       data.append("phone", formData.phone);
       data.append("lineId", formData.lineId);
+      data.append("referrer", formData.referrer.trim() || "ไม่มี");
       data.append("zone", formData.zone);
       data.append("zoneName", zones[formData.zone as keyof typeof zones]?.name || "");
       data.append("category", formData.category);
@@ -254,6 +256,7 @@ export default function RegisterPage() {
             <div><strong>ผู้สมัคร:</strong> {formData.firstName} {formData.lastName}</div>
             <div><strong>เบอร์โทร:</strong> {formData.phone}</div>
             <div><strong>Line ID:</strong> {formData.lineId}</div>
+            <div><strong>ผู้แนะนำ:</strong> <span className="font-semibold text-slate-700">{formData.referrer.trim() || "ไม่มี"}</span></div>
             <div><strong>โซนที่จอง:</strong> {zones[formData.zone as keyof typeof zones]?.name} ({formData.boothCount} ล็อค)</div>
             <div><strong>ยอดมัดจำ:</strong> ฿{(calculateTotal() / 2).toLocaleString()} บาท</div>
 
@@ -366,9 +369,44 @@ export default function RegisterPage() {
                     placeholder="Line ID สำหรับดึงเข้ากลุ่ม" />
                 </div>
               </div>
+
+              {/* ช่องกรอก ผู้แนะนำ (ผู้แนะนำให้มาสมัคร) */}
+              <div className="bg-amber-50/70 p-4 rounded-2xl border border-amber-200">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-bold text-slate-800">
+                    ผู้แนะนำ (ผู้แนะนำให้มาสมัคร) <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-[11px] text-amber-800 bg-amber-200/80 font-bold px-2.5 py-0.5 rounded-full">
+                    จำเป็นต้องระบุ
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mb-2">
+                  *ระบุชื่อผู้แนะนำ หรือหากไม่มีผู้แนะนำให้พิมพ์คำว่า <strong className="text-amber-900">"ไม่มี"</strong>
+                </p>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    name="referrer" 
+                    value={formData.referrer} 
+                    onChange={handleInputChange} 
+                    className="w-full border-2 border-slate-300 rounded-xl p-3 text-slate-900 font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none bg-white placeholder-slate-400 pr-28" 
+                    placeholder="เช่น สมชาย ใจดี หรือพิมพ์ 'ไม่มี'" 
+                  />
+                  {formData.referrer !== "ไม่มี" && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, referrer: "ไม่มี" })}
+                      className="absolute right-2 top-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 transition cursor-pointer"
+                    >
+                      กดใส่ "ไม่มี"
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <button 
                 onClick={nextStep}
-                disabled={!formData.firstName || !formData.lastName || !formData.shopName || !formData.phone || !formData.lineId}
+                disabled={!formData.firstName || !formData.lastName || !formData.shopName || !formData.phone || !formData.lineId || !formData.referrer.trim()}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-xl mt-8 hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all text-lg disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ดำเนินการต่อ ➔

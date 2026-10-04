@@ -52,10 +52,10 @@ export async function GET() {
       console.warn("Could not get sheet metadata, using default:", metaErr?.message);
     }
 
-    // 2. อ่านข้อมูลทั้งหมดจากแท็บชีตแรก
+    // 2. อ่านข้อมูลทั้งหมดจากแท็บชีตแรก (คอลัมน์ A ถึง O)
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `'${sheetTitle}'!A:N`,
+      range: `'${sheetTitle}'!A:O`,
     });
 
     const allRows = res.data.values || [];
@@ -74,6 +74,8 @@ export async function GET() {
       "ราคาเต็มรวม (บาท)",
       "ยอดมัดจำ 50% (บาท)",
       "หลักฐานการโอนเงิน (สลิป)",
+      "สิทธิประโยชน์และสิ่งที่จะได้รับ",
+      "ผู้แนะนำ",
     ];
 
     // ตรวจสอบว่าแถวแรกเป็น Header หรือไม่
@@ -105,7 +107,7 @@ export async function GET() {
           });
           await sheets.spreadsheets.values.update({
             spreadsheetId: SPREADSHEET_ID,
-            range: `'${sheetTitle}'!A1:M1`,
+            range: `'${sheetTitle}'!A1:O1`,
             valueInputOption: "USER_ENTERED",
             requestBody: { values: [HEADERS] },
           });
@@ -116,7 +118,7 @@ export async function GET() {
       try {
         await sheets.spreadsheets.values.update({
           spreadsheetId: SPREADSHEET_ID,
-          range: `'${sheetTitle}'!A1:M1`,
+          range: `'${sheetTitle}'!A1:O1`,
           valueInputOption: "USER_ENTERED",
           requestBody: { values: [HEADERS] },
         });
@@ -127,6 +129,16 @@ export async function GET() {
     let totalFull = 0;
     let totalBooked = 0;
     const zoneBooked: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+
+    // สรุปยอดผู้แนะนำร้านค้า & ค่าตอบแทน 10%
+    const referrerMap = new Map<string, {
+      name: string;
+      shopCount: number;
+      boothCount: number;
+      totalSales: number;
+      totalDeposit: number;
+      shops: string[];
+    }>();
 
     const vendors = dataRows.map((row, index) => {
       const timestamp = row[0] || "-";
@@ -143,6 +155,8 @@ export async function GET() {
       const depositPrice = parseFloat((row[11] || "0").replace(/,/g, "")) || 0;
       const slipUrl = row[12] || "-";
       const benefits = row[13] || "-";
+      const rawReferrer = (row[14] || "").trim();
+      const referrer = rawReferrer && rawReferrer !== "-" ? rawReferrer : "ไม่มี";
 
       totalBooked += boothCount;
       totalDeposit += depositPrice;
@@ -150,6 +164,26 @@ export async function GET() {
 
       if (zone && zoneBooked[zone] !== undefined) {
         zoneBooked[zone] += boothCount;
+      }
+
+      // สะสมข้อมูลผู้แนะนำ (ไม่นับกรณี "ไม่มี", "-", หรือว่าง)
+      if (referrer !== "ไม่มี" && referrer !== "-" && referrer !== "ไม่ระบุ") {
+        const existing = referrerMap.get(referrer) || {
+          name: referrer,
+          shopCount: 0,
+          boothCount: 0,
+          totalSales: 0,
+          totalDeposit: 0,
+          shops: [],
+        };
+        existing.shopCount += 1;
+        existing.boothCount += boothCount;
+        existing.totalSales += fullPrice;
+        existing.totalDeposit += depositPrice;
+        if (!existing.shops.includes(shopName)) {
+          existing.shops.push(shopName);
+        }
+        referrerMap.set(referrer, existing);
       }
 
       return {
@@ -169,8 +203,21 @@ export async function GET() {
         totalFull: fullPrice,
         slipUrl,
         benefits,
+        referrer,
       };
     });
+
+    let totalCommission = 0;
+    const referrals = Array.from(referrerMap.values())
+      .map((r) => {
+        const commission = Math.round(r.totalSales * 0.10); // 10% จากราคาเต็มของร้านที่แนะนำมา
+        totalCommission += commission;
+        return {
+          ...r,
+          commission,
+        };
+      })
+      .sort((a, b) => b.shopCount - a.shopCount || b.totalSales - a.totalSales);
 
     // เรียงลำดับจากร้านที่สมัครล่าสุดขึ้นก่อน
     const vendorsReversed = [...vendors].reverse();
@@ -185,7 +232,10 @@ export async function GET() {
         totalDeposit,
         totalFull,
         zoneBooked,
+        totalReferrals: referrals.length,
+        totalCommission,
       },
+      referrals,
       vendors: vendorsReversed,
     });
 

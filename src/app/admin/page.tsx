@@ -12,6 +12,16 @@ interface ZoneItem {
   booked: number;
 }
 
+interface ReferrerItem {
+  name: string;
+  shopCount: number;
+  boothCount: number;
+  totalSales: number;
+  totalDeposit: number;
+  commission: number;
+  shops: string[];
+}
+
 interface VendorItem {
   id: string;
   timestamp: string;
@@ -26,6 +36,8 @@ interface VendorItem {
   totalDeposit: number;
   totalFull: number;
   slipUrl: string;
+  benefits?: string;
+  referrer?: string;
 }
 
 const DEFAULT_ZONES: ZoneItem[] = [
@@ -38,6 +50,7 @@ const DEFAULT_ZONES: ZoneItem[] = [
 export default function AdminDashboard() {
   const [zones, setZones] = useState<ZoneItem[]>(DEFAULT_ZONES);
   const [vendors, setVendors] = useState<VendorItem[]>([]);
+  const [referrals, setReferrals] = useState<ReferrerItem[]>([]);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [sheetTitle, setSheetTitle] = useState("");
   const [apiError, setApiError] = useState("");
@@ -48,6 +61,8 @@ export default function AdminDashboard() {
     totalBooked: 0,
     totalDeposit: 0,
     totalFull: 0,
+    totalReferrals: 0,
+    totalCommission: 0,
   });
 
   const fetchData = async () => {
@@ -76,6 +91,7 @@ export default function AdminDashboard() {
         if (data.sheetTitle) setSheetTitle(data.sheetTitle);
         setGoogleStats(data.stats);
         setVendors(data.vendors || []);
+        setReferrals(data.referrals || []);
 
         // นำจำนวนล็อคที่จองจริงจาก Google Sheet มาอัปเดตในแต่ละโซน
         const zoneCounts = data.stats.zoneBooked || {};
@@ -264,6 +280,94 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Referral Leaderboard & 10% Commission Summary (เฉพาะ Admin) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-gray-800">
+                🤝 สรุปผลงานผู้แนะนำร้านค้า &amp; ค่าตอบแทน 10%
+              </h2>
+              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200">
+                🔒 โชว์เฉพาะแอดมิน
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              สรุปจำนวนร้านค้าที่แต่ละคนแนะนำมา พร้อมคำนวณส่วนแบ่ง 10% จากยอดขายราคาเต็มของล็อค
+            </p>
+          </div>
+
+          {referrals.length > 0 && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-4 py-2 text-right">
+              <div className="text-[11px] font-semibold text-gray-500">รวมค่าตอบแทนแนะนำทั้งหมด (10%)</div>
+              <div className="text-lg font-black text-amber-700">
+                ฿{(googleStats.totalCommission || referrals.reduce((sum, r) => sum + r.commission, 0)).toLocaleString()}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {referrals.length === 0 ? (
+          <div className="text-center py-8 text-gray-400 text-sm bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <span className="text-2xl block mb-1">🤝</span>
+            ยังไม่มีข้อมูลผู้แนะนำร้านค้า หรือร้านค้าทั้งหมดระบุ &quot;ไม่มี&quot;
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-amber-50/70 text-gray-700 font-bold border-b border-amber-100 text-xs">
+                <tr>
+                  <th className="py-3 px-4 text-center w-16">อันดับ</th>
+                  <th className="py-3 px-4">ชื่อผู้แนะนำ</th>
+                  <th className="py-3 px-4 text-center">จำนวนร้านที่หาได้</th>
+                  <th className="py-3 px-4 text-center">ล็อครวม</th>
+                  <th className="py-3 px-4">ร้านค้าที่แนะนำมา</th>
+                  <th className="py-3 px-4 text-right">ยอดขายรวม (ราคาเต็ม)</th>
+                  <th className="py-3 px-4 text-right text-amber-900 font-extrabold bg-amber-100/50">
+                    ค่าตอบแทน 10%
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {referrals.map((ref, idx) => (
+                  <tr key={ref.name} className="hover:bg-amber-50/20 transition">
+                    <td className="py-3.5 px-4 text-center font-bold text-gray-500">
+                      {idx === 0 ? "🥇 1" : idx === 1 ? "🥈 2" : idx === 2 ? "🥉 3" : idx + 1}
+                    </td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900 text-sm">
+                      {ref.name}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">
+                        {ref.shopCount} ร้าน
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-semibold text-gray-700">
+                      {ref.boothCount} ล็อค
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-gray-600 max-w-xs">
+                      <div className="flex flex-wrap gap-1">
+                        {ref.shops.map((s, i) => (
+                          <span key={i} className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[11px]">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-right text-gray-600 font-medium">
+                      ฿{ref.totalSales.toLocaleString()}
+                    </td>
+                    <td className="py-3.5 px-4 text-right font-extrabold text-amber-700 text-base bg-amber-50/30">
+                      ฿{ref.commission.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* Recent Vendors from Google Sheets */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
         <div className="flex justify-between items-center mb-4">
@@ -310,6 +414,11 @@ export default function AdminDashboard() {
                     <td className="py-3.5 px-4 text-xs text-gray-600">
                       <div>{v.ownerName}</div>
                       <div className="text-gray-400">{v.phone}</div>
+                      {v.referrer && v.referrer !== "ไม่มี" && (
+                        <div className="text-[11px] text-amber-700 font-semibold mt-0.5">
+                          🤝 แนะนำโดย: {v.referrer}
+                        </div>
+                      )}
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">

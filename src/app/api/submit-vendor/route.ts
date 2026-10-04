@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     const totalFull = formData.get("totalFull") as string || "0";
     const totalDeposit = formData.get("totalDeposit") as string || "0";
     const benefits = formData.get("benefits") as string || "-";
+    const referrer = formData.get("referrer") as string || "ไม่มี";
     const slipFile = formData.get("slip") as File | null;
 
     const timestamp = new Date().toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
@@ -223,13 +224,14 @@ export async function POST(req: NextRequest) {
           "ยอดมัดจำ 50% (บาท)",
           "หลักฐานการโอนเงิน (สลิป)",
           "สิทธิประโยชน์ที่ได้รับ",
+          "ผู้แนะนำ",
         ];
 
         // ตรวจสอบและสร้างหัวตารางที่แถว 1 อัตโนมัติ
         try {
           const headerCheck = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
-            range: `'${sheetTitle}'!A1:N1`,
+            range: `'${sheetTitle}'!A1:O1`,
           });
           const firstRow = headerCheck.data.values?.[0] || [];
 
@@ -237,7 +239,7 @@ export async function POST(req: NextRequest) {
             // แถว 1 ว่างเปล่า -> เขียนหัวตารางลงไปได้เลย
             await sheets.spreadsheets.values.update({
               spreadsheetId: SPREADSHEET_ID,
-              range: `'${sheetTitle}'!A1:N1`,
+              range: `'${sheetTitle}'!A1:O1`,
               valueInputOption: "USER_ENTERED",
               requestBody: { values: [HEADERS] },
             });
@@ -268,13 +270,21 @@ export async function POST(req: NextRequest) {
                 });
                 await sheets.spreadsheets.values.update({
                   spreadsheetId: SPREADSHEET_ID,
-                  range: `'${sheetTitle}'!A1:N1`,
+                  range: `'${sheetTitle}'!A1:O1`,
                   valueInputOption: "USER_ENTERED",
                   requestBody: { values: [HEADERS] },
                 });
               } catch (insErr) {
                 console.warn("Could not insert header row:", insErr);
               }
+            } else if (firstRow.length < HEADERS.length) {
+              // หัวตารางยังเป็นแบบเดิม อัปเดตให้มีคอลัมน์ใหม่ครบถ้วน
+              await sheets.spreadsheets.values.update({
+                spreadsheetId: SPREADSHEET_ID,
+                range: `'${sheetTitle}'!A1:O1`,
+                valueInputOption: "USER_ENTERED",
+                requestBody: { values: [HEADERS] },
+              });
             }
           }
         } catch (hErr) {
@@ -288,14 +298,14 @@ export async function POST(req: NextRequest) {
         try {
           await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
-            range: `'${sheetTitle}'!A:N`,
+            range: `'${sheetTitle}'!A:O`,
             valueInputOption: "USER_ENTERED",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
               values: [[
                 timestamp, firstName, lastName, shopName, formattedPhone,
                 formattedLineId, zone, zoneName, category,
-                boothCount, totalFull, totalDeposit, slipUrl, benefits
+                boothCount, totalFull, totalDeposit, slipUrl, benefits, referrer
               ]],
             },
           });
