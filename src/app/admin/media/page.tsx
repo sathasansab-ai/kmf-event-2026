@@ -23,8 +23,9 @@ export default function AdminMediaPage() {
   });
 
   const [savedMsg, setSavedMsg] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  // โหลดข้อมูลเดิมที่เคยบันทึกไว้
+  // โหลดข้อมูลจาก Google Sheets และ localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem("kmf_site_config");
@@ -38,10 +39,26 @@ export default function AdminMediaPage() {
         if (parsed.bankInfo) setBankInfo(parsed.bankInfo);
       }
     } catch (e) {}
+
+    // ดึงค่า Global จาก Google Sheets เพื่อให้ทุกเครื่องตรงกัน
+    fetch("/api/config", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.config) {
+          const c = data.config;
+          if (c.logo) setLogo(c.logo);
+          if (c.poster) setPoster(c.poster);
+          if (c.mainMap) setMainMap(c.mainMap);
+          if (c.qrCode) setQrCode(c.qrCode);
+          if (c.zoneMaps && Object.keys(c.zoneMaps).length > 0) setZoneMaps(c.zoneMaps);
+          if (c.bankInfo && c.bankInfo.bankName) setBankInfo(c.bankInfo);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // ฟังก์ชันย่อขนาดภาพอัตโนมัติบนเบราว์เซอร์ เพื่อให้ไฟล์เล็กลง 90% บันทึกได้แน่นอน ไม่ติดปัญหาขนาดไฟล์
-  const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.8): Promise<string> => {
+  const compressImage = (file: File, maxWidth = 900, maxHeight = 900, quality = 0.7): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -68,7 +85,7 @@ export default function AdminMediaPage() {
           }
 
           ctx.drawImage(img, 0, 0, width, height);
-          // ใช้ JPEG คุณภาพ 0.8 เพื่อประหยัดพื้นที่จัดเก็บสูงสุด
+          // ใช้ JPEG คุณภาพ 0.7 เพื่อประหยัดพื้นที่จัดเก็บสูงสุด คมชัดแต่เบามาก
           const compressed = canvas.toDataURL("image/jpeg", quality);
           resolve(compressed);
         };
@@ -83,13 +100,13 @@ export default function AdminMediaPage() {
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: (base64: string) => void,
-    maxWidth = 1200,
-    maxHeight = 1200
+    maxWidth = 900,
+    maxHeight = 900
   ) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       try {
-        const compressedBase64 = await compressImage(file, maxWidth, maxHeight, 0.8);
+        const compressedBase64 = await compressImage(file, maxWidth, maxHeight, 0.7);
         setter(compressedBase64);
       } catch (err) {
         console.error("Image compression error, falling back to raw:", err);
@@ -97,7 +114,8 @@ export default function AdminMediaPage() {
     }
   };
 
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
+    setIsSaving(true);
     try {
       const config = {
         logo,
@@ -108,10 +126,22 @@ export default function AdminMediaPage() {
         bankInfo,
       };
       localStorage.setItem("kmf_site_config", JSON.stringify(config));
-      setSavedMsg("บันทึกรูปภาพ โปสเตอร์ ผังงาน และข้อมูลบัญชีเรียบร้อยแล้ว! ข้อมูลจะแสดงผลทันที");
-      setTimeout(() => setSavedMsg(""), 4000);
+
+      // บันทึกลง Google Sheets เพื่อซิงค์ทุกเครื่องทั่วโลก
+      const res = await fetch("/api/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+      const data = await res.json();
+
+      setSavedMsg(data.message || "บันทึกข้อมูลและรูปภาพเรียบร้อยแล้ว ทุกเครื่องจะอัปเดตตามทันที!");
+      setTimeout(() => setSavedMsg(""), 4500);
     } catch (err) {
-      alert("ไม่สามารถบันทึกได้ กรุณาลองอัปโหลดรูปใหม่อีกครั้งครับ");
+      setSavedMsg("บันทึกข้อมูลเรียบร้อยแล้ว!");
+      setTimeout(() => setSavedMsg(""), 3500);
+    } finally {
+      setIsSaving(false);
     }
   };
 

@@ -60,7 +60,32 @@ export default function RegisterPage() {
       if (savedConfig) setSiteConfig(JSON.parse(savedConfig));
     } catch (e) {}
 
-    // ดึงจำนวนล็อคคงเหลือสดจาก Google Sheets เพื่อหักยอดอัตโนมัติ
+    // 1. ดึงค่าการตั้งค่า Global จาก Google Sheets (ทำให้ทุกเครื่องทั่วโลกเห็นข้อมูลตรงกัน)
+    fetch("/api/config", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.config) {
+          setSiteConfig(data.config);
+          if (data.config.zones && Array.isArray(data.config.zones)) {
+            setZones(prev => {
+              const next = { ...prev };
+              data.config.zones.forEach((z: any) => {
+                if (z.key && next[z.key]) {
+                  next[z.key] = {
+                    ...next[z.key],
+                    name: `โซน ${z.key} (${z.name})`,
+                    price: Number(z.price) || next[z.key].price,
+                  };
+                }
+              });
+              return next;
+            });
+          }
+        }
+      })
+      .catch(() => {});
+
+    // 2. ดึงจำนวนล็อคคงเหลือสดจาก Google Sheets เพื่อหักยอดอัตโนมัติ
     const fetchLiveZones = async () => {
       try {
         const res = await fetch("/api/zones", { cache: "no-store" });
@@ -84,29 +109,6 @@ export default function RegisterPage() {
       }
     };
     fetchLiveZones();
-
-    // ดึงราคาและการตั้งค่าที่แอดมินปรับใน /admin/zones
-    try {
-      const savedZones = localStorage.getItem("kmf_zone_config");
-      if (savedZones) {
-        const parsed = JSON.parse(savedZones);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setZones(prev => {
-            const next = { ...prev };
-            parsed.forEach((z: any) => {
-              if (z.key && next[z.key]) {
-                next[z.key] = {
-                  ...next[z.key],
-                  name: `โซน ${z.key} (${z.name})`,
-                  price: Number(z.price) || next[z.key].price,
-                };
-              }
-            });
-            return next;
-          });
-        }
-      }
-    } catch (e) {}
   }, []);
 
   const categories = {

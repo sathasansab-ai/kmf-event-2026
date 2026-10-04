@@ -16,7 +16,7 @@ export default function Home() {
   });
 
   useEffect(() => {
-    // โหลดรูปภาพและโลโก้จากที่แอดมินตั้งค่าไว้
+    // 1. โหลดจาก localStorage เบื้องต้น
     try {
       const savedMedia = localStorage.getItem("kmf_site_config");
       if (savedMedia) {
@@ -24,20 +24,25 @@ export default function Home() {
         if (parsed.poster) setPosterUrl(parsed.poster);
         if (parsed.logo) setLogoUrl(parsed.logo);
       }
-
-      // โหลดราคาโซนจากที่แอดมินปรับใน /admin/zones
-      const savedZones = localStorage.getItem("kmf_zone_config");
-      if (savedZones) {
-        const parsedZones = JSON.parse(savedZones);
-        if (Array.isArray(parsedZones)) {
-          const newPrices: any = {};
-          parsedZones.forEach((z: any) => {
-            if (z.key && z.price) newPrices[z.key] = z.price;
-          });
-          setZonePrices(prev => ({ ...prev, ...newPrices }));
-        }
-      }
     } catch (e) {}
+
+    // 2. ดึงค่า Global Configuration จาก Google Sheets (ทำให้ทุกเครื่องเห็นรูปและราคาตรงกัน 100%)
+    fetch("/api/config", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.config) {
+          if (data.config.poster) setPosterUrl(data.config.poster);
+          if (data.config.logo) setLogoUrl(data.config.logo);
+          if (data.config.zones && Array.isArray(data.config.zones)) {
+            const newPrices: any = {};
+            data.config.zones.forEach((z: any) => {
+              if (z.key && z.price) newPrices[z.key] = z.price;
+            });
+            setZonePrices(prev => ({ ...prev, ...newPrices }));
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   return (

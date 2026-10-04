@@ -124,11 +124,12 @@ export async function POST(req: NextRequest) {
                 }
               } catch (gasErr: any) {
                 console.warn("Apps Script upload warn:", gasErr?.message);
+                slipUrl = `ERROR Apps Script: ${gasErr?.message || "เชื่อมต่อ Apps Script ไม่สำเร็จ"}`;
               }
             }
 
             // หากยังไม่ได้ slipUrl ให้ใช้วิธี Google Drive API ตามปกติ
-            if (slipUrl === "-") {
+            if (slipUrl === "-" || slipUrl.startsWith("ERROR Apps Script")) {
               let uploaded: any = null;
               try {
                 uploaded = await drive.files.create({
@@ -145,21 +146,33 @@ export async function POST(req: NextRequest) {
                   supportsAllDrives: true,
                 });
               } catch (folderUploadErr: any) {
-                console.warn("Upload to shop folder failed, trying root folder:", folderUploadErr?.message);
-                // Fallback: หากอัปโหลดลงโฟลเดอร์ย่อยมีปัญหา ให้เซฟลงโฟลเดอร์หลัก
-                uploaded = await drive.files.create({
-                  requestBody: {
-                    name: safeFileName,
-                    parents: [DRIVE_FOLDER_ID],
-                    description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
-                  },
-                  media: {
-                    mimeType: slipFile.type || "image/jpeg",
-                    body: Readable.from(buffer),
-                  },
-                  fields: "id, name, webViewLink, webContentLink",
-                  supportsAllDrives: true,
-                });
+                const msg = folderUploadErr?.message || "";
+                if (msg.includes("Service Accounts do not have storage quota")) {
+                  slipUrl = "ERROR: Service Account ไม่มี Quota จัดเก็บไฟล์ (กรุณาตั้งค่า GOOGLE_APPS_SCRIPT_URL ตามคู่มือ)";
+                } else {
+                  console.warn("Upload to shop folder failed, trying root folder:", folderUploadErr?.message);
+                  try {
+                    uploaded = await drive.files.create({
+                      requestBody: {
+                        name: safeFileName,
+                        parents: [DRIVE_FOLDER_ID],
+                        description: `สลิปโอนเงิน ร้าน: ${shopName} โซน: ${zone} วันที่: ${timestamp}`,
+                      },
+                      media: {
+                        mimeType: slipFile.type || "image/jpeg",
+                        body: Readable.from(buffer),
+                      },
+                      fields: "id, name, webViewLink, webContentLink",
+                      supportsAllDrives: true,
+                    });
+                  } catch (rootErr: any) {
+                    if (rootErr?.message?.includes("storage quota")) {
+                      slipUrl = "ERROR: Service Account ไม่มี Quota จัดเก็บไฟล์ (กรุณาตั้งค่า GOOGLE_APPS_SCRIPT_URL ใน Netlify ตามคู่มือ)";
+                    } else {
+                      slipUrl = `ERROR Drive: ${rootErr?.message}`;
+                    }
+                  }
+                }
               }
 
               if (uploaded?.data?.id) {

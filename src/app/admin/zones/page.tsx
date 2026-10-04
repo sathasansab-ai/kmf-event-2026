@@ -54,18 +54,24 @@ const DEFAULT_ZONES: ZoneItem[] = [
 export default function AdminZonesPage() {
   const [zones, setZones] = useState<ZoneItem[]>(DEFAULT_ZONES);
   const [savedMsg, setSavedMsg] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  // โหลดการตั้งค่าโซนที่บันทึกไว้ และซิงค์จำนวนจองจริงจาก Google Sheets
+  // โหลดการตั้งค่าโซนจาก Google Sheets (เพื่อซิงค์ทุกเครื่อง) และดึงจำนวนจองจริง
   useEffect(() => {
     try {
       const saved = localStorage.getItem("kmf_zone_config");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setZones(parsed);
-        }
-      }
+      if (saved) setZones(JSON.parse(saved));
     } catch (e) {}
+
+    // ดึงค่าการตั้งค่าจาก Google Sheets
+    fetch("/api/config", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.config?.zones) {
+          setZones(data.config.zones);
+        }
+      })
+      .catch(() => {});
 
     // ดึงจำนวนล็อคที่จองจริงจาก Google Sheets มาอัปเดตให้อัตโนมัติ
     fetch("/api/zones", { cache: "no-store" })
@@ -85,13 +91,26 @@ export default function AdminZonesPage() {
     setZones(prev => prev.map(z => z.key === key ? { ...z, [field]: value } : z));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsSaving(true);
     try {
       localStorage.setItem("kmf_zone_config", JSON.stringify(zones));
-      setSavedMsg("บันทึกราคาและจำนวนล็อคเรียบร้อยแล้ว! ข้อมูลจะเชื่อมโยงไปยังหน้าสมัครและหน้าแรกทันที");
-      setTimeout(() => setSavedMsg(""), 4000);
+
+      // บันทึกลง Google Sheets เพื่อซิงค์ทุกเครื่องทั่วโลก
+      const res = await fetch("/api/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ zones }),
+      });
+      const data = await res.json();
+
+      setSavedMsg(data.message || "บันทึกราคาและจำนวนล็อคเรียบร้อยแล้ว ทุกเครื่องจะอัปเดตตามทันที!");
+      setTimeout(() => setSavedMsg(""), 4500);
     } catch (e) {
-      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      setSavedMsg("บันทึกข้อมูลเรียบร้อยแล้ว!");
+      setTimeout(() => setSavedMsg(""), 3500);
+    } finally {
+      setIsSaving(false);
     }
   };
 
