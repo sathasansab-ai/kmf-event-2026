@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const boothCount = formData.get("boothCount") as string || "1";
     const totalFull = formData.get("totalFull") as string || "0";
     const totalDeposit = formData.get("totalDeposit") as string || "0";
+    const benefits = formData.get("benefits") as string || "-";
     const slipFile = formData.get("slip") as File | null;
 
     const timestamp = new Date().toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
@@ -221,13 +222,14 @@ export async function POST(req: NextRequest) {
           "ราคาเต็มรวม (บาท)",
           "ยอดมัดจำ 50% (บาท)",
           "หลักฐานการโอนเงิน (สลิป)",
+          "สิทธิประโยชน์ที่ได้รับ",
         ];
 
         // ตรวจสอบและสร้างหัวตารางที่แถว 1 อัตโนมัติ
         try {
           const headerCheck = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
-            range: `'${sheetTitle}'!A1:M1`,
+            range: `'${sheetTitle}'!A1:N1`,
           });
           const firstRow = headerCheck.data.values?.[0] || [];
 
@@ -235,7 +237,7 @@ export async function POST(req: NextRequest) {
             // แถว 1 ว่างเปล่า -> เขียนหัวตารางลงไปได้เลย
             await sheets.spreadsheets.values.update({
               spreadsheetId: SPREADSHEET_ID,
-              range: `'${sheetTitle}'!A1:M1`,
+              range: `'${sheetTitle}'!A1:N1`,
               valueInputOption: "USER_ENTERED",
               requestBody: { values: [HEADERS] },
             });
@@ -266,7 +268,7 @@ export async function POST(req: NextRequest) {
                 });
                 await sheets.spreadsheets.values.update({
                   spreadsheetId: SPREADSHEET_ID,
-                  range: `'${sheetTitle}'!A1:M1`,
+                  range: `'${sheetTitle}'!A1:N1`,
                   valueInputOption: "USER_ENTERED",
                   requestBody: { values: [HEADERS] },
                 });
@@ -286,14 +288,14 @@ export async function POST(req: NextRequest) {
         try {
           await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
-            range: `'${sheetTitle}'!A:M`,
+            range: `'${sheetTitle}'!A:N`,
             valueInputOption: "USER_ENTERED",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
               values: [[
                 timestamp, firstName, lastName, shopName, formattedPhone,
                 formattedLineId, zone, zoneName, category,
-                boothCount, totalFull, totalDeposit, slipUrl
+                boothCount, totalFull, totalDeposit, slipUrl, benefits
               ]],
             },
           });

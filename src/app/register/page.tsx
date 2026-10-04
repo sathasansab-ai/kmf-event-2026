@@ -23,34 +23,38 @@ export default function RegisterPage() {
     slip: null as File | null,
   });
 
-  const [zones, setZones] = useState<Record<string, { name: string; price: number; remaining: number; mapDesc: string; color: string }>>({
+  const [zones, setZones] = useState<Record<string, { name: string; price: number; remaining: number; mapDesc: string; color: string; benefits?: string[] }>>({
     A: { 
       name: "โซน A (ถนนคนเดิน - FESTIVAL MARKET)", 
       price: 3500, 
       remaining: 30,
       mapDesc: "พื้นที่ริมถนนคนเดินสายหลัก ใกล้เวทีกลาง มีคนเดินผ่านตลอดทั้งคืน",
-      color: "bg-orange-500"
+      color: "bg-orange-500",
+      benefits: ["เต็นท์ขนาด 2x2 เมตร", "หลอดไฟส่องสว่าง 1 จุด", "ระบบไฟฟ้า (ไม่เกิน 4.5 แอมป์)"],
     },
     B: { 
       name: "โซน B (ร้านค้า , ร้าน Craft - ART & MARKET)", 
       price: 2500, 
       remaining: 15,
       mapDesc: "พื้นที่ลานคราฟท์และต้นไม้ใหญ่ บรรยากาศอบอุ่น สไตล์วินเทจ",
-      color: "bg-blue-500"
+      color: "bg-blue-500",
+      benefits: ["เต็นท์ขนาด 2x2 เมตร", "หลอดไฟส่องสว่าง 1 จุด", "ระบบไฟฟ้า (ไม่เกิน 4.5 แอมป์)"],
     },
     C: { 
       name: "โซน C (ตลาดริมน้ำ - FOOD ZONE)", 
       price: 2000, 
       remaining: 7,
       mapDesc: "พื้นที่เลียบระเบียงริมน้ำบึงหัวทะเล เหมาะสำหรับอาหารและเครื่องดื่มชิลๆ",
-      color: "bg-teal-500"
+      color: "bg-teal-500",
+      benefits: ["โต๊ะ 1 ตัว เก้าอี้ 2 ตัว", "ร่มสนามกันแดด", "หลอดไฟส่องสว่าง", "ระบบไฟฟ้า (ไม่เกิน 4.5 แอมป์)"],
     },
     D: { 
       name: "โซน D (Food Truck - CINEMA BY THE RIVER)", 
       price: 4000, 
       remaining: 8,
       mapDesc: "ลานจอดรถ Food Truck กว้างขวาง ด้านหน้าจอหนังกลางแปลงริมน้ำ",
-      color: "bg-rose-500"
+      color: "bg-rose-500",
+      benefits: ["พื้นที่จอดรถ Food Truck", "จุดเชื่อมต่อระบบไฟฟ้า (ไม่เกิน 15 แอมป์)", "จุดทิ้งขยะและจัดการน้ำเสีย"],
     },
   });
 
@@ -75,6 +79,7 @@ export default function RegisterPage() {
                     ...next[z.key],
                     name: `โซน ${z.key} (${z.name})`,
                     price: Number(z.price) || next[z.key].price,
+                    benefits: Array.isArray(z.benefits) ? z.benefits : next[z.key].benefits,
                   };
                 }
               });
@@ -200,6 +205,7 @@ export default function RegisterPage() {
     setSubmitError("");
 
     try {
+      const zoneBenefits = zones[formData.zone as keyof typeof zones]?.benefits || [];
       const data = new FormData();
       data.append("firstName", formData.firstName);
       data.append("lastName", formData.lastName);
@@ -212,6 +218,7 @@ export default function RegisterPage() {
       data.append("boothCount", String(formData.boothCount));
       data.append("totalFull", String(calculateTotal()));
       data.append("totalDeposit", String(calculateTotal() / 2));
+      data.append("benefits", zoneBenefits.join(", "));
       data.append("slip", formData.slip);
 
       const res = await fetch("/api/submit-vendor", {
@@ -232,6 +239,7 @@ export default function RegisterPage() {
 
   // --- Success View ---
   if (isSubmitted) {
+    const selectedZoneBenefits = zones[formData.zone as keyof typeof zones]?.benefits || [];
     return (
       <div className="min-h-screen bg-slate-900 py-16 px-4 flex items-center justify-center font-sans">
         <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-2xl space-y-4">
@@ -242,13 +250,33 @@ export default function RegisterPage() {
           <p className="text-sm font-bold text-blue-700 bg-blue-50 py-2 px-4 rounded-xl">
             ร้าน: {formData.shopName}
           </p>
-          <div className="text-xs text-slate-500 space-y-1 text-left bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div className="text-xs text-slate-500 space-y-1.5 text-left bg-slate-50 p-4 rounded-2xl border border-slate-200">
             <div><strong>ผู้สมัคร:</strong> {formData.firstName} {formData.lastName}</div>
             <div><strong>เบอร์โทร:</strong> {formData.phone}</div>
             <div><strong>Line ID:</strong> {formData.lineId}</div>
             <div><strong>โซนที่จอง:</strong> {zones[formData.zone as keyof typeof zones]?.name} ({formData.boothCount} ล็อค)</div>
             <div><strong>ยอดมัดจำ:</strong> ฿{(calculateTotal() / 2).toLocaleString()} บาท</div>
-            <div><strong>การเก็บข้อมูล:</strong> ส่งไปยัง Google Sheets และเก็บสลิปในโฟลเดอร์ Google Drive ชื่อร้านเรียบร้อย</div>
+
+            {/* ต่อท้ายยอดมัดจำ: สิทธิประโยชน์ / สิ่งที่จะได้รับ */}
+            {selectedZoneBenefits.length > 0 && (
+              <div className="pt-2.5 pb-1 border-t border-slate-200 mt-2 bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-100">
+                <div className="font-bold text-emerald-950 text-xs mb-1.5 flex items-center gap-1">
+                  <span>🎁</span> <span>สิทธิประโยชน์ / สิ่งที่จะได้รับ:</span>
+                </div>
+                <div className="space-y-1 pl-1">
+                  {selectedZoneBenefits.map((b, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5 text-emerald-900 text-xs font-medium">
+                      <span className="text-emerald-600 font-bold">✓</span>
+                      <span>{b}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-2 border-t border-slate-200 mt-2 text-[11px] text-slate-500">
+              <strong>การเก็บข้อมูล:</strong> ส่งไปยัง Google Sheets และเก็บสลิปในโฟลเดอร์ Google Drive ชื่อร้านเรียบร้อย
+            </div>
           </div>
           <p className="text-xs text-slate-400">
             ทีมงานจะตรวจสอบสลิปการโอนเงินและดึงเข้ากลุ่ม Line ภายใน 24 ชม.
@@ -419,6 +447,24 @@ export default function RegisterPage() {
                 </div>
               )}
 
+              {/* Selected Zone Benefits Preview */}
+              {formData.zone && zones[formData.zone]?.benefits && zones[formData.zone].benefits.length > 0 && (
+                <div className="bg-emerald-50/90 p-4 rounded-2xl border border-emerald-200 animate-fadeIn">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-950 mb-2">
+                    <span>🎁</span>
+                    <span>สิทธิประโยชน์และสิ่งที่จะได้รับในโซน {formData.zone}:</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {zones[formData.zone].benefits.map((b, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 text-xs text-emerald-900 bg-white/90 px-3 py-1.5 rounded-xl border border-emerald-100 shadow-xs">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span className="font-medium">{b}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {formData.zone && (
                 <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -488,6 +534,23 @@ export default function RegisterPage() {
                     <span>฿{(calculateTotal() / 2).toLocaleString()}</span>
                   </div>
                   <p className="text-xs text-slate-500 text-right mt-1">*ส่วนที่เหลือ ฿{(calculateTotal() / 2).toLocaleString()} ชำระในวันจัดงาน</p>
+
+                  {/* สิทธิประโยชน์ / สิ่งที่จะได้รับ */}
+                  {zones[formData.zone as keyof typeof zones]?.benefits && (zones[formData.zone as keyof typeof zones].benefits?.length || 0) > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-100 text-left bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-100/60">
+                      <span className="text-xs font-bold text-emerald-950 flex items-center gap-1 mb-1.5">
+                        <span>🎁</span> <span>สิทธิประโยชน์ที่รวมอยู่ในราคานี้:</span>
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 pl-1">
+                        {zones[formData.zone as keyof typeof zones].benefits?.map((b, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 text-xs text-emerald-900">
+                            <span className="text-emerald-600 font-bold">✓</span>
+                            <span>{b}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

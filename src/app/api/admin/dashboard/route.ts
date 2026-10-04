@@ -55,7 +55,7 @@ export async function GET() {
     // 2. อ่านข้อมูลทั้งหมดจากแท็บชีตแรก
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `'${sheetTitle}'!A:M`,
+      range: `'${sheetTitle}'!A:N`,
     });
 
     const allRows = res.data.values || [];
@@ -142,6 +142,7 @@ export async function GET() {
       const fullPrice = parseFloat((row[10] || "0").replace(/,/g, "")) || 0;
       const depositPrice = parseFloat((row[11] || "0").replace(/,/g, "")) || 0;
       const slipUrl = row[12] || "-";
+      const benefits = row[13] || "-";
 
       totalBooked += boothCount;
       totalDeposit += depositPrice;
@@ -167,6 +168,7 @@ export async function GET() {
         totalDeposit: depositPrice,
         totalFull: fullPrice,
         slipUrl,
+        benefits,
       };
     });
 

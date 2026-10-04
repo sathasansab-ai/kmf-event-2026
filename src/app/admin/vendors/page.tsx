@@ -16,6 +16,7 @@ interface Vendor {
   totalDeposit: number;
   totalFull: number;
   slipUrl: string;
+  benefits?: string;
   status: "รอตรวจสอบ" | "อนุมัติแล้ว" | "ปฏิเสธ";
 }
 
@@ -126,8 +127,15 @@ export default function AdminVendorsPage() {
                       <div className="text-blue-600">💬 {v.lineId}</div>
                     </td>
                     <td className="p-4 text-xs">
-                      <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded mr-1">Zone {v.zone}</span>
-                      <span className="text-slate-500">{v.category}</span>
+                      <div className="flex items-center gap-1 mb-1">
+                        <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">Zone {v.zone}</span>
+                        <span className="text-slate-500">{v.category}</span>
+                      </div>
+                      {v.benefits && v.benefits !== "-" && (
+                        <div className="text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block max-w-[200px] truncate" title={v.benefits}>
+                          🎁 {v.benefits}
+                        </div>
+                      )}
                     </td>
                     <td className="p-4 font-bold text-center">{v.boothCount}</td>
                     <td className="p-4 font-bold text-rose-600 text-right">฿{v.totalDeposit.toLocaleString()}</td>
