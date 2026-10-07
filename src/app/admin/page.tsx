@@ -139,10 +139,10 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-extrabold text-gray-900">ภาพรวมระบบ (Dashboard)</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">ภาพรวมระบบ (Dashboard)</h1>
             {isGoogleConnected ? (
               <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
             ข้อมูลอัปเดตอัตโนมัติ ซิงค์ตรงกับ Google Sheets และการตั้งค่าโซน
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
         <button 
           onClick={handleRefresh}
           disabled={isLoading}
-          className="bg-[#1B1B1B] hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full sm:w-auto bg-[#1B1B1B] hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
           <span className={isLoading ? "animate-spin" : ""}>🔄</span>
           {isLoading ? "กำลังโหลดข้อมูล..." : "รีเฟรชข้อมูล (ดึงจาก Sheet)"}
@@ -176,18 +176,18 @@ export default function AdminDashboard() {
       )}
 
       {refreshToast && (
-        <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-sm font-bold px-4 py-3 rounded-xl shadow-sm animate-pulse">
+        <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs sm:text-sm font-bold px-4 py-3 rounded-xl shadow-sm animate-pulse">
           {refreshToast}
         </div>
       )}
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* จำนวนร้านค้าที่สมัคร */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
-          <div className="text-gray-500 text-sm font-medium mb-1">ร้านค้าที่สมัครแล้ว</div>
-          <div className="text-3xl font-extrabold text-gray-900">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="text-gray-500 text-xs sm:text-sm font-medium mb-1">ร้านค้าที่สมัครแล้ว</div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-gray-900">
             {googleStats.totalVendors} <span className="text-sm font-normal text-gray-500">ร้าน</span>
           </div>
           <div className="mt-2 text-xs font-semibold text-blue-700 bg-blue-50 inline-block px-2.5 py-1 rounded-lg">
@@ -196,9 +196,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* ล็อคว่างทั้งหมด */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
-          <div className="text-gray-500 text-sm font-medium mb-1">พื้นที่ว่างทั้งหมด</div>
-          <div className="text-3xl font-extrabold text-emerald-600">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="text-gray-500 text-xs sm:text-sm font-medium mb-1">พื้นที่ว่างทั้งหมด</div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600">
             {availableBooths} <span className="text-sm font-normal text-gray-500">ล็อค</span>
           </div>
           <div className="mt-2 text-xs font-medium text-gray-500">
@@ -207,9 +207,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* ยอดเงินมัดจำจริงจาก Google Sheets */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
-          <div className="text-gray-500 text-sm font-medium mb-1">ยอดเงินมัดจำ (ที่ได้รับ)</div>
-          <div className="text-3xl font-extrabold text-[#C94232]">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="text-gray-500 text-xs sm:text-sm font-medium mb-1">ยอดเงินมัดจำ (ที่ได้รับ)</div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#C94232]">
             ฿{totalDeposit.toLocaleString()}
           </div>
           <div className="mt-2 text-xs font-medium text-gray-500">
@@ -218,9 +218,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* คาดการณ์รายได้รวม */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
-          <div className="text-gray-500 text-sm font-medium mb-1">คาดการณ์รายได้รวม</div>
-          <div className="text-3xl font-extrabold text-[#1F5B5A]">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="text-gray-500 text-xs sm:text-sm font-medium mb-1">คาดการณ์รายได้รวม</div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#1F5B5A]">
             ฿{projectedRevenue.toLocaleString()}
           </div>
           <div className="mt-2 text-xs font-medium text-gray-500">
@@ -313,8 +313,11 @@ export default function AdminDashboard() {
             ยังไม่มีข้อมูลผู้แนะนำร้านค้า หรือร้านค้าทั้งหมดระบุ &quot;ไม่มี&quot;
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <div className="text-[11px] text-gray-400 mb-2 sm:hidden flex items-center gap-1 px-2">
+              <span>👉</span> <span>เลื่อนตารางไปทางขวาเพื่อดูข้อมูลเต็ม</span>
+            </div>
+            <table className="w-full text-left text-sm min-w-[700px]">
               <thead className="bg-amber-50/70 text-gray-700 font-bold border-b border-amber-100 text-xs">
                 <tr>
                   <th className="py-3 px-4 text-center w-16">อันดับ</th>
@@ -369,10 +372,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Vendors from Google Sheets */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 mt-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">
               📋 รายชื่อร้านค้าที่สมัครล่าสุด (จาก Google Sheets)
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
@@ -393,8 +396,11 @@ export default function AdminDashboard() {
             ยังไม่มีร้านค้าสมัครเข้ามา ข้อมูลจะปรากฏที่นี่ทันทีเมื่อมีคนส่งแบบฟอร์ม
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <div className="text-[11px] text-gray-400 mb-2 sm:hidden flex items-center gap-1 px-2">
+              <span>👉</span> <span>เลื่อนตารางไปทางขวาเพื่อดูข้อมูลเต็ม</span>
+            </div>
+            <table className="w-full text-left text-sm min-w-[720px]">
               <thead className="bg-gray-50 text-gray-600 font-bold border-b text-xs">
                 <tr>
                   <th className="py-3 px-4">เวลาสมัคร</th>

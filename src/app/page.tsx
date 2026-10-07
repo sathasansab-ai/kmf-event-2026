@@ -50,28 +50,28 @@ export default function Home() {
       
       {/* 🎬 Pop-up โปสเตอร์งาน (แสดงเมื่อเปิดเว็บ และกดปิดได้) */}
       {showPoster && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative text-slate-800 border-4 border-amber-400">
+        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative text-slate-800 border-4 border-amber-400 max-h-[92vh] flex flex-col">
             {/* Close Button */}
             <button
               onClick={() => setShowPoster(false)}
-              className="absolute top-3 right-3 w-9 h-9 bg-black/60 hover:bg-black text-white rounded-full flex items-center justify-center text-sm font-black transition z-10"
+              className="absolute top-3 right-3 w-9 h-9 bg-black/60 hover:bg-black text-white rounded-full flex items-center justify-center text-sm font-black transition z-10 cursor-pointer"
               title="ปิดหน้าต่าง"
             >
               ✕
             </button>
 
             {/* Poster Image */}
-            <div className="bg-slate-950 min-h-[360px] flex items-center justify-center text-center p-2">
+            <div className="bg-slate-950 min-h-[260px] sm:min-h-[360px] flex-1 flex items-center justify-center text-center p-2 overflow-y-auto">
               {posterUrl ? (
-                <img src={posterUrl} alt="Event Poster" className="max-h-[500px] w-full object-contain rounded-2xl" />
+                <img src={posterUrl} alt="Event Poster" className="max-h-[50vh] sm:max-h-[500px] w-full object-contain rounded-2xl" />
               ) : (
-                <div className="p-8 text-slate-300 space-y-3">
-                  <span className="text-6xl block">🎬</span>
+                <div className="p-6 sm:p-8 text-slate-300 space-y-2.5 sm:space-y-3">
+                  <span className="text-5xl sm:text-6xl block">🎬</span>
                   <div className="inline-block border border-amber-400 text-amber-300 px-3 py-1 rounded-full text-xs font-bold">
                     NEO CINEMA CARNIVAL : ดูด้วยกัน
                   </div>
-                  <h3 className="text-2xl font-black text-white">KORAT MOVIE FESTIVAL 2026</h3>
+                  <h3 className="text-xl sm:text-2xl font-black text-white">KORAT MOVIE FESTIVAL 2026</h3>
                   <p className="text-xs text-slate-400">20 - 24 ตุลาคม 2569 · ตลาดน้ำบึงหัวทะเล</p>
                   <p className="text-[11px] text-amber-300/80 bg-amber-950/50 p-2 rounded-xl">
                     (ผู้จัดงานสามารถอัปโหลดภาพโปสเตอร์จริงได้ที่เมนู /admin/media)
@@ -81,17 +81,17 @@ export default function Home() {
             </div>
 
             {/* Modal Bottom Actions */}
-            <div className="p-4 bg-slate-50 flex gap-3">
+            <div className="p-3 sm:p-4 bg-slate-50 flex gap-2 sm:gap-3 shrink-0">
               <button
                 onClick={() => setShowPoster(false)}
-                className="w-1/2 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100 transition"
+                className="w-1/2 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-xs sm:text-sm hover:bg-slate-100 transition cursor-pointer"
               >
                 เข้าสู่เว็บไซต์
               </button>
               <Link
                 href="/register"
                 onClick={() => setShowPoster(false)}
-                className="w-1/2 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm text-center shadow transition"
+                className="w-1/2 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm text-center shadow transition flex items-center justify-center"
               >
                 จองล็อคทันที 🎟️
               </Link>
@@ -206,13 +206,13 @@ export default function Home() {
           </div>
 
           {/* CTA Button */}
-          <div className="mt-10 pt-6 text-center">
-            <p className="text-sm text-slate-500 mb-4 font-medium">
+          <div className="mt-8 sm:mt-10 pt-6 text-center">
+            <p className="text-xs sm:text-sm text-slate-500 mb-4 font-medium">
               * จองล็อควันนี้ ชำระมัดจำเพียง 50% ส่วนที่เหลือชำระวันงาน
             </p>
             <Link 
               href="/register"
-              className="inline-block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-extrabold text-lg md:text-xl py-4 px-12 rounded-full shadow-xl transition-all transform hover:-translate-y-1"
+              className="inline-block w-full sm:w-auto bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-extrabold text-base sm:text-xl py-3.5 sm:py-4 px-8 sm:px-12 rounded-full shadow-xl transition-all transform hover:-translate-y-1 text-center"
             >
               สมัครจองพื้นที่ร้านค้า 🎟️
             </Link>

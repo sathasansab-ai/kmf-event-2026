@@ -57,35 +57,33 @@ export default function AdminVendorsPage() {
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
       
       {/* Title & Quick Links */}
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800">
             🏪 ร้านค้าที่สมัคร &amp; ตรวจสอบสลิป
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-slate-500 text-xs sm:text-sm mt-1">
             รายการร้านค้าทั้งหมดดึงตรงจาก Google Sheets แบบเรียลไทม์ พร้อมลิงก์เปิดดูสลิปใน Google Drive
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={fetchVendors}
-            disabled={isLoading}
-            className="flex items-center gap-2 bg-slate-900 text-white hover:bg-slate-800 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer disabled:opacity-50"
-          >
-            <span className={isLoading ? "animate-spin" : ""}>🔄</span>
-            {isLoading ? "กำลังดึงข้อมูล..." : "รีเฟรชข้อมูล"}
-          </button>
-        </div>
+        <button
+          onClick={fetchVendors}
+          disabled={isLoading}
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white hover:bg-slate-800 font-bold px-4 py-2.5 rounded-xl text-xs transition cursor-pointer disabled:opacity-50"
+        >
+          <span className={isLoading ? "animate-spin" : ""}>🔄</span>
+          {isLoading ? "กำลังดึงข้อมูล..." : "รีเฟรชข้อมูล"}
+        </button>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-slate-200 pb-2">
+      {/* Filter Tabs (Responsive Wrap) */}
+      <div className="flex flex-wrap gap-1.5 sm:gap-2 border-b border-slate-200 pb-3">
         {["ALL", "A", "B", "C", "D"].map(z => (
           <button
             key={z}
             onClick={() => setFilterZone(z)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
               filterZone === z 
                 ? "bg-slate-900 text-white shadow" 
                 : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -105,7 +103,10 @@ export default function AdminVendorsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-700">
+            <div className="text-[11px] text-slate-400 p-2 sm:hidden flex items-center gap-1 border-b border-slate-100">
+              <span>👉</span> <span>เลื่อนตารางไปทางขวาเพื่อดูข้อมูลเต็ม</span>
+            </div>
+            <table className="w-full text-left text-sm text-slate-700 min-w-[760px]">
               <thead className="bg-slate-100 text-slate-600 font-bold text-xs uppercase tracking-wider border-b border-slate-200">
                 <tr>
                   <th className="p-4">เวลาสมัคร</th>

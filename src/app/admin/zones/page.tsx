@@ -152,51 +152,52 @@ export default function AdminZonesPage() {
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       
       {/* Title */}
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800">
             📍 จัดการโซน, จำนวนล็อค & ราคา
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-slate-500 text-xs sm:text-sm mt-1">
             ปรับเปลี่ยนราคาต่อล็อค เพิ่ม-ลดโควต้าจำนวนล็อคที่เปิดรับ และระบบจะคำนวณจำนวนที่เหลือให้อัตโนมัติ
           </p>
         </div>
 
         <button
           onClick={handleSave}
-          className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition flex items-center gap-2 self-start"
+          disabled={isSaving}
+          className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
-          <span>💾</span> บันทึกการเปลี่ยนแปลง
+          <span>💾</span> {isSaving ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
         </button>
       </div>
 
       {savedMsg && (
-        <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-sm font-bold p-4 rounded-2xl shadow-sm animate-pulse">
+        <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs sm:text-sm font-bold p-4 rounded-2xl shadow-sm animate-pulse">
           ✅ {savedMsg}
         </div>
       )}
 
       {/* Zones Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {zones.map(z => {
           const remaining = Math.max(0, z.total - z.booked);
           return (
-            <div key={z.key} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+            <div key={z.key} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 space-y-4 sm:space-y-5">
               
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-xl bg-slate-900 text-amber-400 font-black flex items-center justify-center text-lg">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-900 text-amber-400 font-black flex items-center justify-center text-base sm:text-lg">
                     {z.key}
                   </span>
                   <div>
-                    <h2 className="font-bold text-slate-800 text-base">{z.name}</h2>
-                    <p className="text-xs text-slate-400">{z.title}</p>
+                    <h2 className="font-bold text-slate-800 text-sm sm:text-base">{z.name}</h2>
+                    <p className="text-[11px] sm:text-xs text-slate-400">{z.title}</p>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className={`text-xs font-black px-2.5 py-1 rounded-full ${
+                <div className="text-right shrink-0">
+                  <span className={`text-[11px] sm:text-xs font-black px-2 sm:px-2.5 py-1 rounded-full ${
                     remaining <= 3 ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"
                   }`}>
                     เหลือ {remaining} ล็อค
@@ -204,8 +205,8 @@ export default function AdminZonesPage() {
                 </div>
               </div>
 
-              {/* Form Controls */}
-              <div className="grid grid-cols-3 gap-4">
+              {/* Form Controls (Responsive 1-col on mobile, 3-col on tablet/desktop) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 
                 {/* Price */}
                 <div>
@@ -252,7 +253,7 @@ export default function AdminZonesPage() {
               </div>
 
               {/* Calculation Preview */}
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex justify-between items-center text-xs">
+              <div className="bg-slate-50 p-3 sm:p-3.5 rounded-xl border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0 text-xs">
                 <span className="text-slate-500">
                   หน้าผู้สมัครจะแสดง: <strong className="text-emerald-700">"ว่าง {remaining} ล็อค"</strong>
                 </span>

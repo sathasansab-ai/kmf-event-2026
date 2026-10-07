@@ -149,26 +149,27 @@ export default function AdminMediaPage() {
     <div className="space-y-8 max-w-5xl mx-auto pb-16">
       
       {/* Page Title & Save Button */}
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-800">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800">
             🖼️ จัดการรูปภาพ, ผังงาน & โปสเตอร์
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-slate-500 text-xs sm:text-sm mt-1">
             อัปโหลดภาพโปสเตอร์ Pop-up, QR Code พร้อมเพย์, บัญชีธนาคาร และผังงาน
           </p>
         </div>
 
         <button
           onClick={handleSaveAll}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition flex items-center gap-2 self-start"
+          disabled={isSaving}
+          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 sm:py-3 px-6 sm:px-8 rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
-          <span>💾</span> บันทึกข้อมูลทั้งหมด
+          <span>💾</span> {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูลทั้งหมด"}
         </button>
       </div>
 
       {savedMsg && (
-        <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-sm font-bold p-4 rounded-2xl shadow-sm animate-pulse">
+        <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs sm:text-sm font-bold p-4 rounded-2xl shadow-sm animate-pulse">
           ✅ {savedMsg}
         </div>
       )}
@@ -387,9 +388,10 @@ export default function AdminMediaPage() {
       <div className="pt-4 text-center">
         <button
           onClick={handleSaveAll}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-12 rounded-2xl shadow-xl transition-all text-base transform hover:-translate-y-0.5"
+          disabled={isSaving}
+          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-8 sm:px-12 rounded-2xl shadow-xl transition-all text-base transform hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
         >
-          💾 บันทึกรูปภาพและข้อมูลทั้งหมด
+          <span>💾</span> {isSaving ? "กำลังบันทึกข้อมูล..." : "บันทึกรูปภาพและข้อมูลทั้งหมด"}
         </button>
       </div>
 

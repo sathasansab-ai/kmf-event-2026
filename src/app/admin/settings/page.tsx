@@ -83,7 +83,7 @@ export default function AdminSettingsPage() {
         <div className="pt-4 border-t border-slate-200 flex justify-end">
           <button
             type="submit"
-            className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition"
+            className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition cursor-pointer"
           >
             บันทึกการตั้งค่า
           </button>

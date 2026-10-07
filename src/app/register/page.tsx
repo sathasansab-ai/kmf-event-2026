@@ -296,36 +296,36 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 py-10 px-4 font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-900 py-6 sm:py-10 px-3 sm:px-4 font-sans text-slate-900">
       
       <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
         
         {/* Header Progress */}
-        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white p-8 text-center">
+        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white p-5 sm:p-8 text-center">
           {siteConfig?.logo && (
-            <div className="mb-4 flex justify-center">
-              <img src={siteConfig.logo} alt="Event Logo" className="h-16 max-w-[200px] object-contain drop-shadow" />
+            <div className="mb-3 sm:mb-4 flex justify-center">
+              <img src={siteConfig.logo} alt="Event Logo" className="h-12 sm:h-16 max-w-[200px] object-contain drop-shadow" />
             </div>
           )}
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-md">
             ✨ แบบฟอร์มสมัครร้านค้า ✨
           </h1>
-          <p className="text-blue-100 mt-1 text-sm font-medium">
+          <p className="text-blue-100 mt-1 text-xs sm:text-sm font-medium">
             Korat Movie Festival 2026 (เทศกาลหนังเมืองโคราช)
           </p>
           
-          <div className="flex justify-center mt-6">
-            <div className="flex items-center space-x-2 bg-black/30 p-2 rounded-full backdrop-blur-md">
-              <span className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${step >= 1 ? "bg-white text-blue-700 shadow-md" : "text-white/70"}`}>1. ข้อมูล</span>
-              <span className="text-white/50">›</span>
-              <span className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${step >= 2 ? "bg-white text-blue-700 shadow-md" : "text-white/70"}`}>2. เลือกโซน</span>
-              <span className="text-white/50">›</span>
-              <span className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${step >= 3 ? "bg-white text-blue-700 shadow-md" : "text-white/70"}`}>3. ชำระเงิน</span>
+          <div className="flex justify-center mt-5 sm:mt-6">
+            <div className="flex items-center space-x-1 sm:space-x-2 bg-black/30 p-1.5 sm:p-2 rounded-full backdrop-blur-md">
+              <span className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all ${step >= 1 ? "bg-white text-blue-700 shadow-md" : "text-white/70"}`}>1. ข้อมูล</span>
+              <span className="text-white/50 text-xs sm:text-sm">›</span>
+              <span className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all ${step >= 2 ? "bg-white text-blue-700 shadow-md" : "text-white/70"}`}>2. เลือกโซน</span>
+              <span className="text-white/50 text-xs sm:text-sm">›</span>
+              <span className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all ${step >= 3 ? "bg-white text-blue-700 shadow-md" : "text-white/70"}`}>3. ชำระเงิน</span>
             </div>
           </div>
         </div>
 
-        <div className="p-6 md:p-10">
+        <div className="p-4 sm:p-6 md:p-10">
           
           {/* Step 1: ข้อมูลส่วนตัว */}
           {step === 1 && (
@@ -525,10 +525,10 @@ export default function RegisterPage() {
                 </div>
               )}
 
-              <div className="flex space-x-4 mt-8">
-                <button onClick={prevStep} className="w-1/3 bg-white border-2 border-slate-300 text-slate-700 font-bold py-4 rounded-xl hover:bg-slate-50 transition-all">ย้อนกลับ</button>
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 mt-8">
+                <button onClick={prevStep} className="w-full sm:w-1/3 bg-white border-2 border-slate-300 text-slate-700 font-bold py-3.5 sm:py-4 rounded-xl hover:bg-slate-50 transition-all cursor-pointer">ย้อนกลับ</button>
                 <button onClick={nextStep} disabled={!formData.zone || !formData.category} 
-                  className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  className="w-full sm:w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 sm:py-4 rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
                   ดูสรุปยอดชำระเงิน ➔
                 </button>
               </div>
@@ -676,18 +676,18 @@ export default function RegisterPage() {
                 </div>
               )}
 
-              <div className="flex space-x-4 mt-8">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 mt-8">
                 <button 
                   onClick={prevStep} 
                   disabled={isSubmitting}
-                  className="w-1/3 bg-white border-2 border-slate-300 text-slate-700 font-bold py-4 rounded-xl hover:bg-slate-50 transition-all disabled:opacity-50"
+                  className="w-full sm:w-1/3 bg-white border-2 border-slate-300 text-slate-700 font-bold py-3.5 sm:py-4 rounded-xl hover:bg-slate-50 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   แก้ไขข้อมูล
                 </button>
                 <button 
-                  onClick={handleSubmit}
+                  onClick={handleSubmit} 
                   disabled={isSubmitting}
-                  className="w-2/3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all text-lg disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full sm:w-2/3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3.5 sm:py-4 rounded-xl shadow-lg transition-all text-base sm:text-lg disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <span>⏳ กำลังบันทึกข้อมูล...</span>
